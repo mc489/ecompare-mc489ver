@@ -1,154 +1,98 @@
+// app/api/search/route.js
 import { NextResponse } from "next/server";
-import axios from "axios";
 import puppeteer from "puppeteer";
 import { db } from "@/database/drizzle";
 import { searchTb } from "@/database/schema";
 import { getAuth } from "@clerk/nextjs/server";
-const KAMELEO_URL = "http://localhost:5050";
-const PROFILE_ID = process.env.KAMELEO;
 
-async function delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function getProfileStatus() {
-  const res = await axios.get(`${KAMELEO_URL}/profiles/${PROFILE_ID}`);
-  return res.data.status?.lifetimeState || res.data.state;
-}
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
 export async function GET(req) {
   const { userId } = getAuth(req);
   const { searchParams } = new URL(req.url);
   const keyword = searchParams.get("keyword") || "powerbank";
-  console.log(userId);
-  
+
+  // Log search history
   if (userId) {
-    const [newSearch] = await db
-      .insert(searchTb)
-      .values({
-        userId,
-        query: keyword,
-      })
-      .returning();
+    try {
+      await db.insert(searchTb).values({ userId, query: keyword });
+    } catch (err) {
+      console.error("DB insert error:", err.message);
+    }
   }
 
-  let lazadaData = null;
-  let shopeeData = null;
+  const lazadaUrl = `https://www.lazada.com.ph/tag/${encodeURIComponent(
+    keyword.replace(/\s+/g, "-")
+  )}?q=${encodeURIComponent(keyword)}`;
 
+  let browser;
   try {
-    console.log("> Checking profile status...");
-    let status = await getProfileStatus();
-
-    if (status === "terminated") {
-      console.log("> Starting profile...");
-      await axios.post(
-        `${KAMELEO_URL}/profiles/${PROFILE_ID}/start`,
-        {},
-        { headers: { "Content-Type": "application/json" } }
-      );
-
-      let attempts = 0;
-      while (status === "terminated" && attempts < 10) {
-        await delay(500);
-        status = await getProfileStatus();
-        attempts++;
-      }
-      console.log("> Profile started!");
-    }
-
-    const browserWSEndpoint = `ws://localhost:5050/puppeteer/${PROFILE_ID}`;
-    console.log("> Connecting Puppeteer...");
-    const browser = await puppeteer.connect({
-      browserWSEndpoint,
-      defaultViewport: null,
+    browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+      ],
     });
 
     const lazadaPage = await browser.newPage();
-    const shopeePage = await browser.newPage();
+    
+    await lazadaPage.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    );
+    await lazadaPage.setViewport({ width: 1366, height: 900 });
 
-    const lazadaUrl = `https://www.lazada.com.ph/tag/${encodeURIComponent(
-      keyword.replace(/\s+/g, "-")
-    )}?q=${encodeURIComponent(keyword)}&catalog_redirect_tag=true`;
+    let lazadaData = null;
 
-    const shopeeUrl = `https://shopee.ph/search?keyword=${encodeURIComponent(
-      keyword
-    )}`;
-
-    // Lazada capture
-    const lazadaPromise = new Promise((resolve) => {
-      lazadaPage.on("response", async (response) => {
-        const req = response.request();
-        if (
-          (req.resourceType() === "xhr" || req.resourceType() === "fetch") &&
-          response.url().includes("https://www.lazada.com.ph/tag/")
-        ) {
+    lazadaPage.on("response", async (res) => {
+      try {
+        const url = res.url();
+        if (url.includes("/search") || url.includes("catalog") || url.includes("tag")) {
           try {
-            lazadaData = await response.json();
-            resolve();
-          } catch (err) {
-            console.error("> Lazada parse failed:", err.message);
-          }
+            const json = await res.json();
+            if (json && (json.mods || json.listItems)) {
+              lazadaData = json;
+            }
+          } catch (e) {}
         }
-      });
+      } catch (e) {}
     });
 
-    // Shopee capture
-    const shopeePromise = new Promise((resolve) => {
-      shopeePage.on("response", async (response) => {
-        if (response.url().includes("/api/v4/search/search_items")) {
-          try {
-            shopeeData = await response.json();
-            resolve();
-          } catch (err) {
-            console.error("> Shopee parse failed:", err.message);
-          }
-        }
-      });
+    await lazadaPage.goto(lazadaUrl, { 
+      waitUntil: "networkidle2", 
+      timeout: 30000 
     });
 
-    console.log("> Navigating to Lazada + Shopee...");
-    await Promise.all([
-      lazadaPage.goto(lazadaUrl, { waitUntil: "domcontentloaded", timeout: 0 }),
-      shopeePage.goto(shopeeUrl, { waitUntil: "domcontentloaded", timeout: 0 }),
-    ]);
-
-    await Promise.race([
-      Promise.all([lazadaPromise, shopeePromise]),
-      delay(7000),
-    ]);
+    await delay(2000);
 
     if (!lazadaData) {
-      try {
-        const finalUrl = lazadaPage.url();
-        console.log("> Lazada fallback - final URL:", finalUrl);
-
-        const html = await lazadaPage.content();
-        const snippet = html.slice(0, 20_000); // limit size
-
-        lazadaData = {
-          fallback: true,
-          finalUrl,
-          htmlSnippet: snippet,
-        };
-      } catch (err) {
-        console.error("> Lazada fallback failed:", err.message);
-      }
+      lazadaData = { 
+        error: true,
+        message: "Could not retrieve Lazada products"
+      };
     }
 
     await lazadaPage.close();
-    await shopeePage.close();
-    await browser.disconnect();
+    await browser.close();
 
     return NextResponse.json({
       keyword,
+      success: true,
       lazada: lazadaData,
-      shopee: shopeeData,
+      shopee: {
+        available: false,
+        message: "Shopee data is currently unavailable due to their anti-scraping protection.",
+        note: "Shopee requires paid scraping services (ScraperAPI, Bright Data, etc.) which cost $50-100/month."
+      },
     });
   } catch (err) {
-    console.error("ERROR:", err.response?.data || err.message || err);
-    return NextResponse.json(
-      { error: err.message || "Unexpected error" },
-      { status: 500 }
-    );
+    console.error("Search error:", err.message);
+    if (browser) {
+      try {
+        await browser.close();
+      } catch {}
+    }
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

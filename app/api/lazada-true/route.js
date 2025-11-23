@@ -1,19 +1,9 @@
 import { NextResponse } from "next/server";
-import axios from "axios";
 import puppeteer from "puppeteer";
-
-const KAMELEO_URL = "http://localhost:5050";
-const PROFILE_ID = process.env.KAMELEO; // replace with your profile ID
 
 // delay helper
 async function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-// check profile status
-async function getProfileStatus() {
-  const res = await axios.get(`${KAMELEO_URL}/profiles/${PROFILE_ID}`);
-  return res.data.status?.lifetimeState || res.data.state;
 }
 
 export async function GET(request) {
@@ -46,36 +36,35 @@ export async function GET(request) {
   let browser;
 
   try {
-    // ✅ ensure profile running
-    let status = await getProfileStatus();
-    if (status === "terminated") {
-      await axios.post(
-        `${KAMELEO_URL}/profiles/${PROFILE_ID}/start`,
-        {},
-        { headers: { "Content-Type": "application/json" } }
-      );
-
-      let attempts = 0;
-      while (status === "terminated" && attempts < 20) {
-        await delay(500);
-        status = await getProfileStatus();
-        attempts++;
-      }
-    }
-
-    // ✅ connect Puppeteer via Kameleo
-    const browserWSEndpoint = `ws://localhost:5050/puppeteer/${PROFILE_ID}`;
-    browser = await puppeteer.connect({
-      browserWSEndpoint,
-      defaultViewport: null,
+    // Launch headless browser with optimized settings
+    browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-accelerated-2d-canvas",
+        "--disable-gpu",
+        "--disable-web-security",
+        "--disable-features=IsolateOrigins,site-per-process",
+      ],
     });
 
-    // 🔹 Scrape function (uses its own tab per URL)
+    // Scrape function (uses its own tab per URL)
     const scrapeOne = async (productUrl) => {
       const page = await browser.newPage();
+      
+      // Set viewport and user agent for better compatibility
+      await page.setViewport({ width: 1920, height: 1080 });
+      await page.setUserAgent(
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+      );
+
       let apiResponse = null;
 
       const waitForApi = new Promise((resolve) => {
+        const timeout = setTimeout(() => resolve(), 15000); // Reduced timeout
+
         page.on("response", async (res) => {
           try {
             const req = res.request();
@@ -100,8 +89,11 @@ export async function GET(request) {
                         : json.data.modules[0].module;
                   }
 
-                  apiResponse = moduleData;
-                  resolve();
+                  if (moduleData) {
+                    apiResponse = moduleData;
+                    clearTimeout(timeout);
+                    resolve();
+                  }
                 } catch {}
               }
             }
@@ -109,9 +101,17 @@ export async function GET(request) {
         });
       });
 
-      await page.goto(productUrl, { waitUntil: "domcontentloaded" });
-      await Promise.race([waitForApi, delay(20000)]);
-      await page.close();
+      try {
+        await page.goto(productUrl, {
+          waitUntil: "networkidle0",
+          timeout: 20000,
+        });
+        await waitForApi;
+      } catch (err) {
+        console.error(`Error loading ${productUrl}:`, err.message);
+      } finally {
+        await page.close();
+      }
 
       if (!apiResponse?.productOption?.skuBase) {
         return {
@@ -168,40 +168,51 @@ export async function GET(request) {
           currency: currency,
           price: (salePrice || "0").replace(/[₱,]/g, ""),
           priceBeforeDiscount: (originalPrice || "0").replace(/[₱,]/g, ""),
-          stock: skuInfo?.quantity?.limit?.max || null, // Get max orderable as "stock"
-          sold: null, // Lazada API doesn't provide this here
+          stock: skuInfo?.quantity?.limit?.max || null,
+          sold: null,
         };
       });
 
       const numericPrices = variations
         .map((v) =>
           parseFloat(
-            (v.salePrice || v.originalPrice || "").replace(/[₱,]/g, "")
+            (v.price || v.priceBeforeDiscount || "").replace(/[₱,]/g, "")
           )
         )
         .filter((v) => !isNaN(v));
 
-      const lowestPrice = Math.min(...numericPrices);
-      const highestPrice = Math.max(...numericPrices);
+      const lowestPrice =
+        numericPrices.length > 0 ? Math.min(...numericPrices) : null;
+      const highestPrice =
+        numericPrices.length > 0 ? Math.max(...numericPrices) : null;
 
       return {
         url: productUrl,
-        title: productName, // Use "title" to match Shopee
-        brand: apiResponse.product?.brand?.name || "Unknown", // Add brand
+        title: productName,
+        brand: apiResponse.product?.brand?.name || "Unknown",
         description: description,
-        location: "Unknown", // Add location to match
-        rating: apiResponse.review?.averageRating || null, // Add rating
+        location: "Unknown",
+        rating: apiResponse.review?.averageRating || null,
         currency: currency,
         lowestPrice,
         highestPrice,
-        variations, 
+        variations,
       };
     };
 
-    // 🔹 Run all scrapes in parallel
-    const results = await Promise.all(urls.map((u) => scrapeOne(u)));
+    // Run all scrapes in parallel (with concurrency limit for better performance)
+    const concurrency = 5; // Process 5 URLs at a time
+    const results = [];
 
-    await browser.disconnect();
+    for (let i = 0; i < urls.length; i += concurrency) {
+      const batch = urls.slice(i, i + concurrency);
+      const batchResults = await Promise.all(
+        batch.map((u) => scrapeOne(u))
+      );
+      results.push(...batchResults);
+    }
+
+    await browser.close();
     return NextResponse.json({ results });
   } catch (err) {
     console.error("ERROR:", err.message || err);
@@ -212,8 +223,9 @@ export async function GET(request) {
   } finally {
     if (browser) {
       try {
-        await browser.disconnect();
+        await browser.close();
       } catch {}
     }
   }
 }
+

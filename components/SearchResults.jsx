@@ -18,7 +18,7 @@ function SearchResults({
   setIsComparisonView,
   sortBy = "Best Match"
 }) {
-
+const [shopeeUnavailable, setShopeeUnavailable] = useState(false);
   const [aiReply, setAiReply] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const targetRef = useRef(null);
@@ -73,93 +73,99 @@ function SearchResults({
       .replace(/^-+/, "")
       .replace(/-+$/, "");
   }
+async function GetProducts(signal) {
+  try {
+    setLoading(true);
+    const res = await axios.get(
+      `/api/search?keyword=${encodeURIComponent(query)}`,
+      { signal }
+    );
 
-  async function GetProducts(signal) {
-    try {
-      setLoading(true);
-      const res = await axios.get(
-        `/api/search?keyword=${encodeURIComponent(query)}`,
-        { signal }
-      );
+    // Parse Lazada items
+    const lazadaItems =
+      res.data.lazada?.mods?.listItems?.map((item, index) => ({
+        id: `lazada-${item.itemId || index}`,
+        source: "Lazada",
+        name: item.name,
+        image: item.image,
+        merchant: item.sellerName,
+        price: parseFloat(item.price.replace(/[^\d.]/g, "")),
+        link: item.itemUrl,
+        sales: parseInt(
+          (item.itemSoldCntShow || "0").replace(/[^0-9]/g, ""),
+          10
+        ),
+        rating: Math.round((item.ratingScore || 0) * 10) / 10,
+      })) || [];
 
-      const lazadaItems =
-        res.data.lazada?.mods?.listItems?.map((item, index) => ({
-          id: `lazada-${item.itemId || index}`,
-          source: "Lazada",
-          name: item.name,
-          image: item.image,
-          merchant: item.sellerName,
-          price: parseFloat(item.price.replace(/[^\d.]/g, "")),
-          link: item.itemUrl,
-          sales: parseInt(
-            (item.itemSoldCntShow || "0").replace(/[^0-9]/g, ""),
-            10
-          ),
-          rating: Math.round((item.ratingScore || 0) * 10) / 10,
-        })) || [];
+    // Parse Shopee items (with unavailable check)
+    let shopeeItems = [];
+    
+    // Check if Shopee is unavailable
+    if (res.data.shopee && res.data.shopee.available === false) {
+      console.log("ℹ️ Shopee unavailable:", res.data.shopee.message);
+      toast.info("Shopee products are currently unavailable. Showing Lazada results only.", {
+        duration: 5000,
+      });
+    } else if (res.data.shopee?.items && Array.isArray(res.data.shopee.items)) {
+      // Shopee data is available - parse it
+      shopeeItems = res.data.shopee.items
+        .filter((item) => item.item_basic)
+        .map((item, index) => {
+          const b = item.item_basic;
 
-      const shopeeItems =
-        res.data.shopee?.items
-          ?.filter((item) => item.item_basic)
-          ?.map((item, index) => {
-            const b = item.item_basic;
+          let linkShopId = b.shopid;
+          let linkItemId = b.itemid;
 
-            let linkShopId = b.shopid;
-            let linkItemId = b.itemid;
+          if (item.real_items && item.real_items.length > 0) {
+            linkShopId = item.real_items[0].shop_id;
+            linkItemId = item.real_items[0].item_id;
+          }
 
-            if (item.real_items && item.real_items.length > 0) {
-              linkShopId = item.real_items[0].shop_id;
-              linkItemId = item.real_items[0].item_id;
-            }
-            // --- END NEW LOGIC ---
+          const name = b.name;
+          const slug = slugify(name);
 
-            const name = b.name;
-            const slug = slugify(name);
-
-            return {
-              id: `shopee-${b.itemid || index}`,
-              source: "Shopee",
-              name: name,
-              merchant: b.shop_name || "Unknown Seller",
-              image: b.image
-                ? `https://down-ph.img.susercontent.com/file/${b.image}`
-                : null,
-              price: b.price ? b.price / 100000 : 0,
-
-              // Build the link using the prioritized IDs
-              link: `https://shopee.ph/${slug}-i.${linkShopId}.${linkItemId}`,
-
-              sales: b.historical_sold || 0,
-              rating: Math.round((b.item_rating?.rating_star || 0) * 10) / 10,
-            };
-          }) || [];
-
-      const merged = [...lazadaItems, ...shopeeItems];
-      const uniqueProducts = Object.values(
-        merged.reduce((acc, product) => {
-          if (!acc[product.id]) acc[product.id] = product;
-          return acc;
-        }, {})
-      );
-
-      // Store raw unsorted list
-      setRawProducts(uniqueProducts);
-
-      const bestMatch = alternateProducts(uniqueProducts);
-      setProducts(bestMatch);
-    } catch (error) {
-      if (axios.isCancel(error)) {
-        console.log("❌ Request canceled");
-        toast.error(`${error}`);
-      } else {
-        console.error("Error fetching products:", error);
-        toast.error(`${error}`);
-      }
-    } finally {
-      setLoading(false);
+          return {
+            id: `shopee-${b.itemid || index}`,
+            source: "Shopee",
+            name: name,
+            merchant: b.shop_name || "Unknown Seller",
+            image: b.image
+              ? `https://down-ph.img.susercontent.com/file/${b.image}`
+              : null,
+            price: b.price ? b.price / 100000 : 0,
+            link: `https://shopee.ph/${slug}-i.${linkShopId}.${linkItemId}`,
+            sales: b.historical_sold || 0,
+            rating: Math.round((b.item_rating?.rating_star || 0) * 10) / 10,
+          };
+        });
     }
-  }
 
+    // Merge and deduplicate
+    const merged = [...lazadaItems, ...shopeeItems];
+    const uniqueProducts = Object.values(
+      merged.reduce((acc, product) => {
+        if (!acc[product.id]) acc[product.id] = product;
+        return acc;
+      }, {})
+    );
+
+    // Store raw unsorted list
+    setRawProducts(uniqueProducts);
+
+    const bestMatch = alternateProducts(uniqueProducts);
+    setProducts(bestMatch);
+  } catch (error) {
+    if (axios.isCancel(error)) {
+      console.log("❌ Request canceled");
+    } else {
+      console.error("Error fetching products:", error);
+      toast.error("Failed to fetch products. Please try again.");
+    }
+  } finally {
+    setLoading(false);
+  }
+}
   // ---------------------------------------------MOCK DATA ---------------------------------------------
   // async function GetProducts() {
   //   try {
@@ -481,6 +487,28 @@ function SearchResults({
             )}
           </AnimatePresence>
 
+{!showComparisonTable && shopeeUnavailable && (
+  <motion.div
+    initial={{ opacity: 0, y: -20 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="mx-auto w-11/12 max-w-4xl mb-6 mt-4 px-6 py-4 
+               bg-orange-500/20 backdrop-blur-md 
+               border border-orange-400/30 rounded-2xl 
+               text-white text-center"
+  >
+    <div className="flex items-center justify-center gap-3">
+      <span className="text-2xl">ℹ️</span>
+      <div className="text-left">
+        <p className="font-semibold font-vagRounded">
+          Shopee products unavailable
+        </p>
+        <p className="text-sm text-white/80">
+          Showing Lazada results only. Shopee requires additional services to access.
+        </p>
+      </div>
+    </div>
+  </motion.div>
+)}
           <div className="text-center px-10 pt-20 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
             {loading ? (
               // <div className="col-span-full flex flex-col justify-center items-center gap-4 min-h-[60vh]">
