@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import puppeteer from "puppeteer";
+import puppeteerCore from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 
 // delay helper
 async function delay(ms) {
@@ -36,10 +37,11 @@ export async function GET(request) {
   let browser;
 
   try {
-    // Launch headless browser with optimized settings
-    browser = await puppeteer.launch({
-      headless: true,
-      args: [
+    // Configure for Vercel serverless environment
+    const isProduction = process.env.NODE_ENV === "production";
+    
+    browser = await puppeteerCore.launch({
+      args: isProduction ? chromium.args : [
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage",
@@ -48,6 +50,13 @@ export async function GET(request) {
         "--disable-web-security",
         "--disable-features=IsolateOrigins,site-per-process",
       ],
+      defaultViewport: chromium.defaultViewport,
+      executablePath: isProduction 
+        ? await chromium.executablePath() 
+        : process.env.PUPPETEER_EXECUTABLE_PATH || 
+          "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true,
     });
 
     // Scrape function (uses its own tab per URL)
@@ -229,3 +238,5 @@ export async function GET(request) {
   }
 }
 
+// Increase timeout for Vercel
+export const maxDuration = 60;

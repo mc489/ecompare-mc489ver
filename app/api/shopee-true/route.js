@@ -1,6 +1,7 @@
 // app/api/scrape/shopee/route.js
 import { NextResponse } from "next/server";
-import puppeteer from "puppeteer";
+import puppeteerCore from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -237,9 +238,11 @@ export async function POST(req) {
       return NextResponse.json({ error: "urls must be array" }, { status: 400 });
     }
 
-    browser = await puppeteer.launch({
-      headless: true,
-      args: [
+    // Configure for Vercel serverless environment
+    const isProduction = process.env.NODE_ENV === "production";
+    
+    browser = await puppeteerCore.launch({
+      args: isProduction ? chromium.args : [
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-web-security",
@@ -248,6 +251,13 @@ export async function POST(req) {
         "--disable-features=IsolateOrigins,site-per-process",
         "--window-size=390,844",
       ],
+      defaultViewport: chromium.defaultViewport,
+      executablePath: isProduction 
+        ? await chromium.executablePath() 
+        : process.env.PUPPETEER_EXECUTABLE_PATH || 
+          "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true,
     });
 
     const results = [];
@@ -288,3 +298,6 @@ export async function POST(req) {
     }
   }
 }
+
+// Increase timeout for Vercel
+export const maxDuration = 60;
