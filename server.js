@@ -1,7 +1,7 @@
 import next from "next";
 import http from "http";
 import axios from "axios";
-import puppeteer from "puppeteer";
+import puppeteerCore from "puppeteer-core"; // Changed from puppeteer
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
@@ -26,7 +26,7 @@ async function startKameleoProfile(retries = 5) {
       if (status === "running") {
         console.log("> Stopping running profile...");
         await axios.post(`${KAMELEO_URL}/profiles/${PROFILE_ID}/stop`);
-        await delay(3000); // wait a bit to fully stop
+        await delay(3000);
       }
 
       console.log("> Starting profile fresh...");
@@ -37,7 +37,7 @@ async function startKameleoProfile(retries = 5) {
 
       const browserWSEndpoint = `ws://localhost:5050/puppeteer/${PROFILE_ID}`;
       console.log("> Connecting Puppeteer...");
-      const browser = await puppeteer.connect({
+      const browser = await puppeteerCore.connect({ // Changed to puppeteerCore
         browserWSEndpoint,
         defaultViewport: null,
       });
@@ -72,7 +72,7 @@ async function startKameleoProfile(retries = 5) {
 }
 
 app.prepare().then(() => {
-  startKameleoProfile(); // runs once automatically at startup
+  startKameleoProfile();
 
   http
     .createServer((req, res) => handle(req, res))

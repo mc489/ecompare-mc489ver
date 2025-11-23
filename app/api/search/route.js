@@ -1,6 +1,7 @@
 // app/api/search/route.js
 import { NextResponse } from "next/server";
-import puppeteer from "puppeteer";
+import puppeteerCore from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 import { db } from "@/database/drizzle";
 import { searchTb } from "@/database/schema";
 import { getAuth } from "@clerk/nextjs/server";
@@ -27,13 +28,22 @@ export async function GET(req) {
 
   let browser;
   try {
-    browser = await puppeteer.launch({
-      headless: true,
-      args: [
+    // Configure for Vercel serverless environment
+    const isProduction = process.env.NODE_ENV === "production";
+    
+    browser = await puppeteerCore.launch({
+      args: isProduction ? chromium.args : [
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage",
       ],
+      defaultViewport: chromium.defaultViewport,
+      executablePath: isProduction 
+        ? await chromium.executablePath() 
+        : process.env.PUPPETEER_EXECUTABLE_PATH || 
+          "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe", // Windows Chrome path
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true,
     });
 
     const lazadaPage = await browser.newPage();
@@ -54,14 +64,18 @@ export async function GET(req) {
             if (json && (json.mods || json.listItems)) {
               lazadaData = json;
             }
-          } catch (e) {}
+          } catch (e) {
+            // Ignore JSON parse errors
+          }
         }
-      } catch (e) {}
+      } catch (e) {
+        // Ignore response errors
+      }
     });
 
     await lazadaPage.goto(lazadaUrl, { 
       waitUntil: "networkidle2", 
-      timeout: 30000 
+      timeout: 25000 // Reduced timeout for Vercel
     });
 
     await delay(2000);
@@ -91,8 +105,15 @@ export async function GET(req) {
     if (browser) {
       try {
         await browser.close();
-      } catch {}
+      } catch (closeErr) {
+        console.error("Browser close error:", closeErr.message);
+      }
     }
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ 
+      error: err.message,
+      success: false 
+    }, { status: 500 });
   }
 }
+
+// Increase timeout for Vercel (max 60s on Pro, 10s on Hobby)
