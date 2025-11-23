@@ -1,7 +1,7 @@
 // app/api/search/route.js
 import { NextResponse } from "next/server";
 import puppeteerCore from "puppeteer-core";
-import chromium from "@sparticuz/chromium";
+import chromium from "@sparticuz/chromium-min";
 import { db } from "@/database/drizzle";
 import { searchTb } from "@/database/schema";
 import { getAuth } from "@clerk/nextjs/server";

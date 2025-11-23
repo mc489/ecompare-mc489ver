@@ -1,7 +1,7 @@
 // app/api/scrape/shopee/route.js
 import { NextResponse } from "next/server";
 import puppeteerCore from "puppeteer-core";
-import chromium from "@sparticuz/chromium";
+import chromium from "@sparticuz/chromium-min";
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 

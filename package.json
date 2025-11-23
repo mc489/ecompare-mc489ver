@@ -21,7 +21,6 @@
     "@radix-ui/react-popover": "^1.1.15",
     "@react-three/drei": "^10.7.6",
     "@react-three/fiber": "^9.4.0",
-    "@sparticuz/chromium": "^141.0.0",
     "axios": "^1.12.2",
     "cheerio": "^1.1.2",
     "class-variance-authority": "^0.7.1",
