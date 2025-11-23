@@ -1,8 +1,8 @@
 {
   "functions": {
-    "app/api/search/route.js": {
+    "app/api/**/*.js": {
       "maxDuration": 10,
-      "memory": 1024
+      "memory": 3008
     }
   }
 }

@@ -242,7 +242,17 @@ export async function POST(req) {
     const isProduction = process.env.NODE_ENV === "production";
     
     browser = await puppeteerCore.launch({
-      args: isProduction ? chromium.args : [
+      args: isProduction ? [
+        ...chromium.args,
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--disable-setuid-sandbox',
+        '--no-first-run',
+        '--no-sandbox',
+        '--no-zygote',
+        '--single-process',
+        '--window-size=390,844',
+      ] : [
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-web-security",
@@ -253,7 +263,7 @@ export async function POST(req) {
       ],
       defaultViewport: chromium.defaultViewport,
       executablePath: isProduction 
-        ? await chromium.executablePath() 
+        ? await chromium.executablePath("/tmp") 
         : process.env.PUPPETEER_EXECUTABLE_PATH || 
           "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
       headless: chromium.headless,

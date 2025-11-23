@@ -32,14 +32,23 @@ export async function GET(req) {
     const isProduction = process.env.NODE_ENV === "production";
     
     browser = await puppeteerCore.launch({
-      args: isProduction ? chromium.args : [
+      args: isProduction ? [
+        ...chromium.args,
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--disable-setuid-sandbox',
+        '--no-first-run',
+        '--no-sandbox',
+        '--no-zygote',
+        '--single-process',
+      ] : [
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage",
       ],
       defaultViewport: chromium.defaultViewport,
       executablePath: isProduction 
-        ? await chromium.executablePath() 
+        ? await chromium.executablePath("/tmp") 
         : process.env.PUPPETEER_EXECUTABLE_PATH || 
           "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe", // Windows Chrome path
       headless: chromium.headless,
@@ -117,3 +126,4 @@ export async function GET(req) {
 }
 
 // Increase timeout for Vercel (max 60s on Pro, 10s on Hobby)
+export const maxDuration = 60; // Remove this line if on Hobby plan
