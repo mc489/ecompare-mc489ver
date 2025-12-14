@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import chromium from "@sparticuz/chromium";
 import playwright from "playwright-core";
 import { addExtra } from "playwright-extra";
-import StealthPlugin from "puppeteer-extra-plugin-stealth";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
