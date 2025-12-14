@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import Card from "@/components/Card";
 import SkeletonResult from "./SkeletonResult";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,9 +16,8 @@ function SearchResults({
   query,
   onToggleHeader,
   setIsComparisonView,
-  sortBy = "Best Match"
+  sortBy = "Best Match",
 }) {
-const [shopeeUnavailable, setShopeeUnavailable] = useState(false);
   const [aiReply, setAiReply] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const targetRef = useRef(null);
@@ -39,11 +38,12 @@ const [shopeeUnavailable, setShopeeUnavailable] = useState(false);
   const [compareid, setCompareID] = useState();
   const minimizedSnapshot = useRef([]);
   const [loadingCompare, setLoadingCompare] = useState(false);
+
   useEffect(() => {
     if (typeof onToggleHeader === "function") {
       onToggleHeader(!showComparisonTable);
     }
-  });
+  }, [showComparisonTable, onToggleHeader]);
   useEffect(() => {
     if (typeof setIsComparisonView === "function") {
       setIsComparisonView(showComparisonTable);
@@ -73,99 +73,93 @@ const [shopeeUnavailable, setShopeeUnavailable] = useState(false);
       .replace(/^-+/, "")
       .replace(/-+$/, "");
   }
-async function GetProducts(signal) {
-  try {
-    setLoading(true);
-    const res = await axios.get(
-      `/api/search?keyword=${encodeURIComponent(query)}`,
-      { signal }
-    );
 
-    // Parse Lazada items
-    const lazadaItems =
-      res.data.lazada?.mods?.listItems?.map((item, index) => ({
-        id: `lazada-${item.itemId || index}`,
-        source: "Lazada",
-        name: item.name,
-        image: item.image,
-        merchant: item.sellerName,
-        price: parseFloat(item.price.replace(/[^\d.]/g, "")),
-        link: item.itemUrl,
-        sales: parseInt(
-          (item.itemSoldCntShow || "0").replace(/[^0-9]/g, ""),
-          10
-        ),
-        rating: Math.round((item.ratingScore || 0) * 10) / 10,
-      })) || [];
+  async function GetProducts(signal) {
+    try {
+      setLoading(true);
+      const res = await axios.get(
+        `/api/search?keyword=${encodeURIComponent(query)}`,
+        { signal }
+      );
 
-    // Parse Shopee items (with unavailable check)
-    let shopeeItems = [];
-    
-    // Check if Shopee is unavailable
-    if (res.data.shopee && res.data.shopee.available === false) {
-      console.log("ℹ️ Shopee unavailable:", res.data.shopee.message);
-      toast.info("Shopee products are currently unavailable. Showing Lazada results only.", {
-        duration: 5000,
-      });
-    } else if (res.data.shopee?.items && Array.isArray(res.data.shopee.items)) {
-      // Shopee data is available - parse it
-      shopeeItems = res.data.shopee.items
-        .filter((item) => item.item_basic)
-        .map((item, index) => {
-          const b = item.item_basic;
+      const lazadaItems =
+        res.data.lazada?.mods?.listItems?.map((item, index) => ({
+          id: `lazada-${item.itemId || index}`,
+          source: "Lazada",
+          name: item.name,
+          image: item.image,
+          merchant: item.sellerName,
+          price: parseFloat(item.price.replace(/[^\d.]/g, "")),
+          link: item.itemUrl,
+          sales: parseInt(
+            (item.itemSoldCntShow || "0").replace(/[^0-9]/g, ""),
+            10
+          ),
+          rating: Math.round((item.ratingScore || 0) * 10) / 10,
+        })) || [];
 
-          let linkShopId = b.shopid;
-          let linkItemId = b.itemid;
+      const shopeeItems =
+        res.data.shopee?.items
+          ?.filter((item) => item.item_basic)
+          ?.map((item, index) => {
+            const b = item.item_basic;
 
-          if (item.real_items && item.real_items.length > 0) {
-            linkShopId = item.real_items[0].shop_id;
-            linkItemId = item.real_items[0].item_id;
-          }
+            let linkShopId = b.shopid;
+            let linkItemId = b.itemid;
 
-          const name = b.name;
-          const slug = slugify(name);
+            if (item.real_items && item.real_items.length > 0) {
+              linkShopId = item.real_items[0].shop_id;
+              linkItemId = item.real_items[0].item_id;
+            }
+            // --- END NEW LOGIC ---
 
-          return {
-            id: `shopee-${b.itemid || index}`,
-            source: "Shopee",
-            name: name,
-            merchant: b.shop_name || "Unknown Seller",
-            image: b.image
-              ? `https://down-ph.img.susercontent.com/file/${b.image}`
-              : null,
-            price: b.price ? b.price / 100000 : 0,
-            link: `https://shopee.ph/${slug}-i.${linkShopId}.${linkItemId}`,
-            sales: b.historical_sold || 0,
-            rating: Math.round((b.item_rating?.rating_star || 0) * 10) / 10,
-          };
-        });
+            const name = b.name;
+            const slug = slugify(name);
+
+            return {
+              id: `shopee-${b.itemid || index}`,
+              source: "Shopee",
+              name: name,
+              merchant: b.shop_name || "Unknown Seller",
+              image: b.image
+                ? `https://down-ph.img.susercontent.com/file/${b.image}`
+                : null,
+              price: b.price ? b.price / 100000 : 0,
+
+              // Build the link using the prioritized IDs
+              link: `https://shopee.ph/${slug}-i.${linkShopId}.${linkItemId}`,
+
+              sales: b.historical_sold || 0,
+              rating: Math.round((b.item_rating?.rating_star || 0) * 10) / 10,
+            };
+          }) || [];
+
+      const merged = [...lazadaItems, ...shopeeItems];
+      const uniqueProducts = Object.values(
+        merged.reduce((acc, product) => {
+          if (!acc[product.id]) acc[product.id] = product;
+          return acc;
+        }, {})
+      );
+
+      // Store raw unsorted list
+      setRawProducts(uniqueProducts);
+
+      const bestMatch = alternateProducts(uniqueProducts);
+      setProducts(bestMatch);
+    } catch (error) {
+      if (axios.isCancel(error)) {
+        console.log("❌ Request canceled");
+        toast.error(`${error}`);
+      } else {
+        console.error("Error fetching products:", error);
+        toast.error(`${error}`);
+      }
+    } finally {
+      setLoading(false);
     }
-
-    // Merge and deduplicate
-    const merged = [...lazadaItems, ...shopeeItems];
-    const uniqueProducts = Object.values(
-      merged.reduce((acc, product) => {
-        if (!acc[product.id]) acc[product.id] = product;
-        return acc;
-      }, {})
-    );
-
-    // Store raw unsorted list
-    setRawProducts(uniqueProducts);
-
-    const bestMatch = alternateProducts(uniqueProducts);
-    setProducts(bestMatch);
-  } catch (error) {
-    if (axios.isCancel(error)) {
-      console.log("❌ Request canceled");
-    } else {
-      console.error("Error fetching products:", error);
-      toast.error("Failed to fetch products. Please try again.");
-    }
-  } finally {
-    setLoading(false);
   }
-}
+
   // ---------------------------------------------MOCK DATA ---------------------------------------------
   // async function GetProducts() {
   //   try {
@@ -267,34 +261,41 @@ async function GetProducts(signal) {
     };
   }, [query]);
 
-  function handleToggle(productId) {
-    setSelectedProducts((prev) => {
-      const isLocked = lockedProducts.includes(productId);
-      const alreadySelected = prev.includes(productId);
-      if (isLocked) return prev;
-      if (alreadySelected) return prev.filter((id) => id !== productId);
+  const handleToggle = useCallback(
+    (productId) => {
+      setSelectedProducts((prev) => {
+        const isLocked = lockedProducts.includes(productId);
+        const alreadySelected = prev.includes(productId);
+        if (isLocked) return prev;
+        if (alreadySelected) return prev.filter((id) => id !== productId);
 
-      if (isAddingOneMore) {
-        if (prev.length >= 3) return prev;
+        if (isAddingOneMore) {
+          if (prev.length >= 3) return prev;
 
-        const newSelected = [...prev, productId];
-        if (newSelected.length === 3) {
-          setTimeout(() => {
-            setIsAddingOneMore(false);
-            setLockedProducts([]);
-            setShowCompare(false);
-            CompareAction(newSelected).then(() => {
-              setShowComparisonTable(true);
-            });
-          }, 300);
+          const newSelected = [...prev, productId];
+
+          // If we hit 3 items, trigger comparison immediately
+          if (newSelected.length === 3) {
+            setTimeout(() => {
+              setIsAddingOneMore(false);
+              setLockedProducts([]);
+              setShowCompare(false);
+
+              // This now works because CompareAction accepts 'newSelected'
+              CompareAction(newSelected).then(() => {
+                setShowComparisonTable(true);
+              });
+            }, 300);
+          }
+          return newSelected;
         }
-        return newSelected;
-      }
 
-      if (prev.length >= 3) return prev;
-      return [...prev, productId];
-    });
-  }
+        if (prev.length >= 3) return prev;
+        return [...prev, productId];
+      });
+    },
+    [lockedProducts, isAddingOneMore]
+  );
   useEffect(() => {
     let lastScrollY = 0;
     const handleScroll = () => {
@@ -368,62 +369,58 @@ async function GetProducts(signal) {
 
   //------------------------------------------------------------legit---------------------------------------------------------------------------
 
-  async function CompareAction() {
+  async function CompareAction(idsToCompare = selectedProducts) {
     try {
       setLoadingCompare(true);
       setShowComparisonTable(true);
-      const selected = products.filter((p) => selectedProducts.includes(p.id));
+
+      const selected = products.filter((p) => idsToCompare.includes(p.id));
+
       if (selected.length === 0) {
         toast.error("No products selected");
         return;
       }
 
-      const lazadaUrls = selected
-        .filter((p) => p.source === "Lazada")
-        .map((p) => (p.link.startsWith("//") ? "https:" + p.link : p.link));
+      // 1. Separate Lazada & Shopee products
+      const lazadaProducts = selected.filter((p) => p.source === "Lazada");
+      const shopeeProducts = selected.filter((p) => p.source === "Shopee"); // (Ignored for now)
 
-      const shopeeUrls = selected
-        .filter((p) => p.source === "Shopee")
-        .map((p) => p.link);
+      // 2. Create an array of individual promises (One request per product)
+      const scrapePromises = lazadaProducts.map((product) => {
+        // Prepare a single-item array for the API
+        const singleUrlArray = JSON.stringify([
+          product.link.startsWith("//")
+            ? "https:" + product.link
+            : product.link,
+        ]);
 
-      const requests = [];
+        // Fire request!
+        return axios
+          .get(`/api/lazada-true?urls=${encodeURIComponent(singleUrlArray)}`)
+          .then((res) => res.data.results?.[0]) // Grab the first (and only) result
+          .catch((err) => {
+            console.error(`Failed to scrape ${product.name}:`, err);
+            return { error: "Scrape Failed", source: "Lazada" };
+          });
+      });
 
-      if (lazadaUrls.length > 0) {
-        const encodedUrls = encodeURIComponent(JSON.stringify(lazadaUrls));
-        requests.push(
-          axios
-            .get(`/api/lazada-true?urls=${encodedUrls}`)
-            .then((res) => res.data.results)
-            .catch((err) => {
-              console.error(" Lazada scrape failed:", err);
-              return [];
-            })
-        );
+      // 3. Wait for all 3 Vercel servers to finish simultaneously
+      const results = await Promise.all(scrapePromises);
+
+      // Filter out any undefined/null results
+      const validResults = results.filter((item) => item);
+
+      setComparisonResults(validResults);
+
+      // Save to history (Optional: You can save them as a batch if needed)
+      if (validResults.length > 0) {
+        await axios.post("/api/history", { snapshot: validResults });
       }
 
-      if (shopeeUrls.length > 0) {
-        requests.push(
-          axios
-            .post(`/api/shopee-true`, { urls: shopeeUrls })
-            .then((res) => res.data.results)
-            .catch((err) => {
-              console.error("Shopee scrape failed:", err);
-              return [];
-            })
-        );
-      }
-
-      const resultsArrays = await Promise.all(requests);
-
-      const results = resultsArrays.flat();
-
-      setComparisonResults(results);
-
-      const res = await axios.post("/api/history", { snapshot: results });
-      setCompareID(res.data.comparisonId);
+      setCompareID("new-compare-session"); // Mock ID or from response
       setShowComparisonTable(true);
     } catch (error) {
-      console.error(" CompareAction failed:", error);
+      console.error("CompareAction failed:", error);
       toast.error("Something went wrong while comparing");
     } finally {
       setLoadingCompare(false);
@@ -444,6 +441,11 @@ async function GetProducts(signal) {
     fetchLikes();
   }, [query]);
 
+  const selectedImages = selectedProducts.map((id) => {
+    const p = products.find((prod) => prod.id === id);
+    return p ? p.image : null;
+  });
+
   return (
     <>
       {!showComparisonTable && (
@@ -456,8 +458,9 @@ async function GetProducts(signal) {
               : { y: 0, backdropFilter: "blur(0px)" }
           }
           transition={{ type: "spring", stiffness: 200, damping: 25 }}
-          className={`relative z-30 min-h-screen ${showCompare ? "inner-shadow-y" : "bg-transparent"
-            }`}
+          className={`relative z-30 min-h-screen ${
+            showCompare ? "inner-shadow-y" : "bg-transparent"
+          }`}
           style={{ top: "5px", overflow: "visible" }}
         >
           {/* ✕ and ━ Buttons */}
@@ -487,28 +490,6 @@ async function GetProducts(signal) {
             )}
           </AnimatePresence>
 
-{!showComparisonTable && shopeeUnavailable && (
-  <motion.div
-    initial={{ opacity: 0, y: -20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="mx-auto w-11/12 max-w-4xl mb-6 mt-4 px-6 py-4 
-               bg-orange-500/20 backdrop-blur-md 
-               border border-orange-400/30 rounded-2xl 
-               text-white text-center"
-  >
-    <div className="flex items-center justify-center gap-3">
-      <span className="text-2xl">ℹ️</span>
-      <div className="text-left">
-        <p className="font-semibold font-vagRounded">
-          Shopee products unavailable
-        </p>
-        <p className="text-sm text-white/80">
-          Showing Lazada results only. Shopee requires additional services to access.
-        </p>
-      </div>
-    </div>
-  </motion.div>
-)}
           <div className="text-center px-10 pt-20 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
             {loading ? (
               // <div className="col-span-full flex flex-col justify-center items-center gap-4 min-h-[60vh]">
@@ -742,15 +723,52 @@ async function GetProducts(signal) {
               <div className="overflow-x-hidden overflow-hidden relative z-10">
                 <div className="w-3/4 mx-auto flex gap-4">
                   {comparisonResults.map((result, index) => {
-                    const p = products.find((x) => x.id === selectedProducts[index]);
-                    const variations = result.variations || [];
+                    const p = products.find(
+                      (x) => x.id === selectedProducts[index]
+                    );
+
+                    if (!result || result.error) {
+                      return (
+                        <div
+                          key={p?.id || index}
+                          className="flex flex-col flex-1 min-w-[220px] pb-5"
+                        >
+                          <div className="glass-button1 rounded-[23px] h-full min-h-[600px] flex flex-col items-center justify-center p-6 text-center gap-4 border border-red-500/30">
+                            {p?.image && (
+                              <img
+                                src={p.image}
+                                className="w-24 h-24 object-contain opacity-50 grayscale rounded-lg"
+                                alt="Unavailable"
+                              />
+                            )}
+                            <div>
+                              <p className="font-bold text-red-300 text-lg">
+                                Data Unavailable
+                              </p>
+                              <p className="text-sm text-white/60 mt-1">
+                                We couldn't fetch the latest details for this
+                                item.
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => window.open(p?.link, "_blank")}
+                              className="bg-white/10 hover:bg-white/20 text-white text-sm px-4 py-2 rounded-full transition-colors"
+                            >
+                              View on Store
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    const variations = result?.variations || [];
                     let minPrice = null;
                     let maxPrice = null;
 
                     if (variations.length > 0) {
                       const prices = variations
-                        .map(v => Number(v.price))
-                        .filter(v => !isNaN(v));
+                        .map((v) => Number(v.price))
+                        .filter((v) => !isNaN(v));
 
                       if (prices.length > 0) {
                         minPrice = Math.min(...prices);
@@ -758,21 +776,21 @@ async function GetProducts(signal) {
                       }
                     }
 
-                    // Check if a variation is selected
                     const selectedVar = selectedVariations[p?.id];
-                    const variationPrice = selectedVar && !isNaN(Number(selectedVar.price))
-                      ? Number(selectedVar.price)
-                      : null;
+                    const variationPrice =
+                      selectedVar && !isNaN(Number(selectedVar.price))
+                        ? Number(selectedVar.price)
+                        : null;
 
-                    // Final display logic
                     let displayPrice = "-";
                     if (variationPrice !== null) {
                       displayPrice = variationPrice;
                     } else if (minPrice !== null && maxPrice !== null) {
-                      displayPrice = minPrice === maxPrice ? `${minPrice}` : `${minPrice} - ${maxPrice}`;
+                      displayPrice =
+                        minPrice === maxPrice
+                          ? `${minPrice}`
+                          : `${minPrice} - ${maxPrice}`;
                     }
-
-
 
                     return (
                       <div
@@ -843,13 +861,14 @@ async function GetProducts(signal) {
                             Variations
                           </span>
                           <Dropdown
-                            options={result.variations.map(
+                            // ✅ FIXED: Using the safe local 'variations' array
+                            options={variations.map(
                               (variation) =>
                                 `${variation.name} — ₱${variation.price}`
                             )}
                             onChange={(option) => {
                               const [name] = option.value.split(" — ₱");
-                              const selected = result.variations.find(
+                              const selected = variations.find(
                                 (v) => v.name === name
                               );
                               setSelectedVariations((prev) => ({
@@ -874,9 +893,9 @@ async function GetProducts(signal) {
                           <button
                             onClick={() => window.open(p?.link, "_blank")}
                             className={`
-      glass-button1
-      rounded-full shadow-md compare-button1 text-white text-sm px-5 py-2
-    `}
+                              glass-button1
+                              rounded-full shadow-md compare-button1 text-white text-sm px-5 py-2
+                            `}
                           >
                             Buy Now
                           </button>
@@ -907,7 +926,7 @@ async function GetProducts(signal) {
       )}
 
       <div className="p-[50px] fixed bottom-5 right-5 flex flex-col items-end gap-3 z-50">
-        {!showCompare && !isMinimized && (
+        {!showCompare && !isMinimized && !showComparisonTable && (
           <button
             onClick={() => setShowCompare(true)}
             className="compare-button transition-all text-center text-[20px] text-white rounded-full font-bold w-[215px] h-[52px]"
@@ -929,10 +948,11 @@ async function GetProducts(signal) {
                 await CompareAction();
                 setShowComparisonTable(true);
               }}
-              className={`text-center text-[20px] rounded-full font-bold w-[215px] h-[52px] compare-button ${selectedProducts.length >= 2 && selectedProducts.length <= 3
-                ? "text-white bg-blue-500 hover:bg-black-200"
-                : "text-gray-300 bg-gray-300 cursor-not-allowed pointer-events-none"
-                }`}
+              className={`text-center text-[20px] rounded-full font-bold w-[215px] h-[52px] compare-button ${
+                selectedProducts.length >= 2 && selectedProducts.length <= 3
+                  ? "text-white bg-blue-500 hover:bg-black-200"
+                  : "text-gray-300 bg-gray-300 cursor-not-allowed pointer-events-none"
+              }`}
             >
               Compare Now
             </button>
@@ -946,6 +966,7 @@ async function GetProducts(signal) {
             setAiReply={setAiReply}
             aiLoading={aiLoading}
             setAiLoading={setAiLoading}
+            images={selectedImages}
           />
         )}
       </div>

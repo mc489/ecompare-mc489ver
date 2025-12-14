@@ -1,12 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // ✅ This is the correct, modern setting
+  serverExternalPackages: ["puppeteer-core", "@sparticuz/chromium-min"],
+
+  // ❌ REMOVED: "experimental" block (caused the warning)
+
   webpack: (config) => {
-    config.externals.push(
-      "vertx", // The one from before
-      "bufferutil", // The new one
-      "utf-8-validate" // The other new one
-    );
+    config.externals.push("vertx", "bufferutil", "utf-8-validate");
     return config;
+  },
+
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
   },
 };
 
