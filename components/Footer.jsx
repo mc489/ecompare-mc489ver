@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-
+import { useMediaQuery } from 'react-responsive';
 function Footer() {
   const [displayText, setDisplayText] = useState("by Jeacodes");
   const [fadeClass, setFadeClass] = useState("opacity-100");
@@ -13,6 +13,9 @@ function Footer() {
     "Kobe Tomol"
     
   ];
+const isDesktopOrLaptop = useMediaQuery({ query: '(min-width: 700px)' });
+
+  const isTabletOrMobile = useMediaQuery({ query: '(max-width: 699px)' });
 
   const timeoutRef = useRef(null);     // waiting 3s before starting cycle
   const intervalRef = useRef(null);    // cycling names
@@ -82,8 +85,12 @@ function Footer() {
   }, []);
 
   return (
+    <>
+    {isDesktopOrLaptop &&
+      <>
     <footer
-      className="cursor-default fixed bottom-0 left-0 w-full text-center py-2 bg-header-gradient text-white font-baloo text-lg z-20"
+      className="cursor-default fixed bottom-0 left-0 w-full text-center 
+      py-2 bg-header-gradient text-white font-baloo text-lg z-20"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -91,6 +98,23 @@ function Footer() {
         {displayText}
       </p>
     </footer>
+    </>
+    }
+     {isTabletOrMobile &&
+      <>
+    <footer
+      className="cursor-default fixed bottom-0 left-0 w-full text-center 
+      py-2 bg-header-gradient text-white font-baloo text-[12px] z-20"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <p className={`transition-opacity duration-300 ${fadeClass}`}>
+        {displayText}
+      </p>
+    </footer>
+    </>
+    }
+    </>
   );
 }
 

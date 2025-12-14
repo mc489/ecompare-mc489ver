@@ -1,22 +1,31 @@
 "use client";
+
+import { useMediaQuery } from 'react-responsive';
 import React, { useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 function TextureMesh() {
+  // 1. Detect Mobile for Shader Complexity
+  const isTabletOrMobile = useMediaQuery({ query: '(max-width: 699px)' });
+
   const mesh = useRef();
+
+  // 2. Adjust 'u_detail' based on device
+  // Desktop gets 0.4 (High quality), Mobile gets 0.15 (Performance mode)
+  const detailValue = isTabletOrMobile ? 0.15 : 0.4;
 
   const uniforms = useMemo(
     () => ({
       u_color: { value: new THREE.Vector3(0.3, 0, 1) },
       u_background: { value: new THREE.Vector4(0, 0, 0, 1) },
       u_speed: { value: 0.1 },
-      u_detail: { value: 0.4 },
+      u_detail: { value: detailValue }, // Optimized value here
       u_time: { value: 0 },
       u_mouse: { value: new THREE.Vector2(0, 0) },
       u_resolution: { value: new THREE.Vector2(1024, 1024) },
     }),
-    []
+    [detailValue] // Re-memoize if device type changes
   );
 
   useFrame((state) => {
@@ -76,6 +85,7 @@ const fragmentShader = `
     vec3 cl = vec3(0.0);
     float d = 2.5;
     
+    // This loop is the heavy part. u_detail controls how many times it runs.
     float maxSteps = 1.0 + 20.0 * u_detail;
 
     for (float i = 0.; i < 21.; i++) {
@@ -100,6 +110,9 @@ const fragmentShader = `
 `;
 
 export default function ShaderBackground() {
+  // 3. Detect Mobile for Canvas Resolution
+  const isTabletOrMobile = useMediaQuery({ query: '(max-width: 699px)' });
+
   return (
     <Canvas
       style={{
@@ -110,12 +123,15 @@ export default function ShaderBackground() {
         height: "100vh",
         zIndex: -1,
       }}
-      dpr={[1, 1.5]}
+      // 4. Optimization: Strict cap on Pixel Ratio for mobile
+      // Mobile = [1, 1] (prevents overheating)
+      // Desktop = [1, 1.5] (looks crisp)
+      dpr={isTabletOrMobile ? [1, 1] : [1, 1.5]}
       gl={{
         preserveDrawingBuffer: true,
         premultipliedAlpha: false,
         alpha: true,
-        antialias: false,
+        antialias: false, // Antialias is expensive, keeping it false is good
         precision: "mediump",
         powerPreference: "high-performance",
       }}
