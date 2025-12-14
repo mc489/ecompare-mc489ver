@@ -96,19 +96,19 @@ function HomePage() {
 
           {/* Below content */}
           <div
-            className="flex justify-center items-center flex-row gap-3 font-vagRounded text-white font-medium text-1xl"
+            className="flex justify-center items-center flex-row gap-3 font-vagRounded text-white font-medium text-1xl "
             style={{ width: "40%" }}
           >
             <p className="cursor-default">Powered by </p>
 
 
-            <Image className="cursor-pointer" src={lazada} alt="Lazada" width={24} height={24} onClick={() =>
+            <Image className="cursor-pointer items-center" src={lazada} alt="Lazada" width={24} height={24} onClick={() =>
               window.open(
                 "https://www.lazada.com.ph/"
 
               )
             } />
-            <Image className="cursor-pointer" src={shopee} alt="Shopee" width={16} height={16} onClick={() =>
+            <Image className="cursor-pointer tems-center" src={shopee} alt="Shopee" width={16} height={16} onClick={() =>
               window.open(
                 "https://shopee.ph/"
 
@@ -173,13 +173,13 @@ function HomePage() {
             <p className="cursor-default">Powered by </p>
 
 
-            <Image className="cursor-pointer" src={lazada} alt="Lazada" width={14} height={24} onClick={() =>
+            <Image className="cursor-pointer !items-center" src={lazada} alt="Lazada" width={14} height={24} onClick={() =>
               window.open(
                 "https://www.lazada.com.ph/"
 
               )
             } />
-            <Image className="cursor-pointer" src={shopee} alt="Shopee" width={10} height={16} onClick={() =>
+            <Image className="cursor-pointer items-center " src={shopee} alt="Shopee" width={10} height={16} onClick={() =>
               window.open(
                 "https://shopee.ph/"
 
@@ -188,9 +188,9 @@ function HomePage() {
           </div>
         </div>
       </div>
-
+<div className="[&_footer]:!fixed [&_footer]:!bottom">
       <Footer />
-      </>
+      </div></>
       }
     </>
   );

@@ -103,7 +103,7 @@ const isDesktopOrLaptop = useMediaQuery({ query: '(min-width: 700px)' });
      {isTabletOrMobile &&
       <>
     <footer
-      className="cursor-default fixed bottom-0 left-0 w-full text-center 
+      className="cursor-default bottom-0 left-0 w-full text-center 
       py-2 bg-header-gradient text-white font-baloo text-[12px] z-20"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

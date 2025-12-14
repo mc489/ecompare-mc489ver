@@ -46,24 +46,27 @@
 }
 
 .glass-loginButton {
-  @apply w-full;
-  box-sizing: border-box;
-  height: 64px;
-  background: rgba(255, 255, 255, 0.20);
-  border-width: 0.5px;
-  border-style: solid;
+  @apply w-full;  height: 64px;
+ text-align: center;
+  position: relative;
   border-radius: 23px;
+
+  /* rounded-full */
+
+   background: rgba(255, 255, 255, 0.20);
+
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4),
     inset 0px -2px 4px rgba(255, 255, 255, 0.2);
   /* inner shadow */
-
   border: none;
   overflow: hidden;
   cursor: pointer;
+  z-index: 0;
 }
 
+/* fix mask, keep same gradient */
 .glass-loginButton::before {
   text-align: inherit;
   content: "";
@@ -84,7 +87,6 @@
   mask-border-outset: 0.5px;
   mask-border-slice: 1;
   pointer-events: none;
-
 }
 
 .glass-button {
@@ -95,15 +97,17 @@
   border-width: 0.5px;
   border-style: solid;
   border-radius: 23px;
+  border-top-right-radius: 23px;
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4),
     inset 0px -2px 4px rgba(255, 255, 255, 0.2);
   /* inner shadow */
-
   border: none;
   overflow: hidden;
   cursor: pointer;
+  z-index: 1;
 }
 
 /* fix mask, keep same gradient */
@@ -128,7 +132,6 @@
   mask-border-slice: 1;
   pointer-events: none;
 }
-
 
 .glass-button1 {
   box-sizing: border-box;
