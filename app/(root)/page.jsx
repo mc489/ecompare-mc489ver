@@ -124,11 +124,11 @@ function HomePage() {
       
     {isTabletOrMobile &&
     <>
-      <div className="min-h-[calc(screen-120px)]">
-      
-        <div className="min-h-80 flex justify-center items-center w-full flex-col gap-10">
+
+<div className="!overflow-hidden h-[calc(100vh-140px)] flex "> 
+   <div className="!h-full flex !justify-center items-center w-full flex-col gap-5">
           {/* Search Section */}
-          <div className="flex flex-row justify-center items-center w-full">
+          <div className="flex flex-row !justify-center !items-center ">
             <div className="flex w-[40%] min-w-[300px] relative">
               {/* Fading Placeholder */}
               {!search && (
@@ -189,8 +189,9 @@ function HomePage() {
         </div>
       </div>
 <div className="[&_footer]:!fixed [&_footer]:!bottom">
-      <Footer />
+      <Footer  className="[&_footer]:!fixed [&_footer]:!bottom"  />
       </div></>
+      
       }
     </>
   );

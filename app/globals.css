@@ -645,7 +645,7 @@
   border-width: 0.5px;
   border-style: solid;
   backdrop-filter: blur(10px);
-  border-image-source: linear-gradient(-180deg,
+  border-image-source: linear-gradient(90deg,
       rgba(255, 255, 255, 0.05) 0%,
       rgba(255, 255, 255, 1) 50%,
       rgba(255, 255, 255, 0.05) 100%);
@@ -854,6 +854,7 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  
   }
 
   body {

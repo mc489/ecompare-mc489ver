@@ -313,7 +313,8 @@ function Signin() {
 
                {isTabletOrMobile &&
     <>
-    <div className="flex flex-col lg:flex-row items-stretch justify-center max-w-screen overflow-x-hidden min-h-screen lg:h-screen text-white">
+    <div className="flex flex-col lg:flex-row items-stretch justify-center 
+    max-w-screen overflow-x-hidden min-h-screen lg:h-screen text-white">
       <div className= " w-full lg:w-1/2 px-6 sm:px-10 py-5 flex items-center justify-between flex-col sticky top-0">
         <div className=" mb-15 w-full">
           <h1
@@ -349,7 +350,8 @@ function Signin() {
 
       {/* right side */}
 
-      <div className="w-full px-6 !pt-10 lg:w-1/2 sm:px-10 lg:overflow-y-auto scrollbar !bg-black/20 inner-shadow-y border-l border-gray-500">
+      <div className="w-full px-6 !pt-10 lg:w-1/2 sm:px-10 lg:overflow-y-auto scrollbar 
+      !bg-black/20 inner-shadow-y border-l border-gray-500">
         <form onSubmit={handleSubmit}>
           {/* Email or Username */}
           <div className="mb-7 sm:mb-10">
@@ -478,7 +480,7 @@ function Signin() {
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 512 512"
-                    className="w-4 h-4 sm:w-8 sm:h-8 rounded-md"
+                    className="!w-4 !h-4 sm:w-8 sm:h-8 rounded-md"
                   >
                     <rect width="512" height="512" fill="#1877F2" rx="15" />
                     <path
@@ -487,7 +489,7 @@ function Signin() {
                     />
                   </svg>
                 </div>
-                <span className="text-[16px]">
+                <span className="!text-[16px]">
                   Login with Facebook
                 </span>
                
@@ -499,7 +501,8 @@ function Signin() {
                 Don't have account?{" "}
                 <span
                   onClick={() => router.push("/sign-up")}
-                  className="mb-5 font-vagRounded font-semibold text-[12px] text-white underline cursor-pointer underline-offset-2"
+                  className="mb-5 font-vagRounded font-semibold text-[12px]
+                   text-white underline cursor-pointer underline-offset-2"
                 >
                   Sign up
                 </span>

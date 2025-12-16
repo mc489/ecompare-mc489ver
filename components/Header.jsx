@@ -170,7 +170,7 @@ function Header({ visible = false }) {
   {isTabletOrMobile && 
   <>
     <header className="flex justify-between items-center
-     pl-8 pr-8 py-15 h-16 font font-black bg-header-gradient text-white relative z-10 flex-nowrap">
+     pl-8 pr-8 py-10 h-16 font font-black bg-header-gradient text-white relative z-10 flex-nowrap">
       {/* LEFT SIDE */}
       <div className="flex items-center font-baloo text-[12px] gap-4 ">
         <Link
