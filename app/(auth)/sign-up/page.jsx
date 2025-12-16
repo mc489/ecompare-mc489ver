@@ -648,6 +648,7 @@ function Signup() {
             <div className="!h-[48px] glass-loginInput relative w-full">
               <input
                 type="text"
+                
                 value={email}
                 // live update + debounced validation
                 onChange={(e) => {

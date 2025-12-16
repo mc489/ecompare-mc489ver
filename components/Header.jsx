@@ -209,48 +209,6 @@ function Header({ visible = false }) {
       </div>
 
 
-        {/* CENTER SEARCH BAR */}
-        <div className="justify-center flex w-[40%] min-w-[50px] relative">
-          {isSearchPage && (
-            <div className="flex w-full">
-              {/* Search Input */}
-                 <div className="!h-[24px] glass-search relative flex-[22]">
-                <form onSubmit={handleSearch}>
-
-                  <input
-                    name="q"
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search"
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    className={`!p-0 w-full !h-[28px] rounded-2xl text-white placeholder-white/50 !text-[6px] 
-              font-normal transition-all duration-300  
-               ${isFocused ? "!pl-6" : "!pl-3"}
-                }`}
-                  />
-                  <FaMagnifyingGlass className={`absolute left-[10px] top-1/2 
-                  -translate-y-1/2 text-white/70 text-[8px] transition-all duration-300 z-100 ${isFocused
-                    ? "opacity-100 translate-x-0"
-                    : "opacity-0 -translate-x-3"
-                    }`}
-                  />
-                </form>
-              </div>
-
-              {/* Search Button */}
-              <div onClick={handleSearch}>
-                <button
-                  type="button"
-                  className=" !h-[24px] search-button flex items-center justify-center rounded-r-2xl px-2"
-                >
-                  <FaMagnifyingGlass className="text-white/70 !text-[8px]" />
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* RIGHT SIDE */}
         <div className="flex justify-center items-center gap-5">

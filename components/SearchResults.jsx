@@ -448,11 +448,13 @@ function SearchResults({
 
   return (
     <>
+    
       {!showComparisonTable && (
         <motion.div
           key="motion-container"
           initial={false}
           animate={
+            
             showCompare
               ? { y: 0, backdropFilter: "blur(35px)" }
               : { y: 0, backdropFilter: "blur(0px)" }
@@ -474,6 +476,7 @@ function SearchResults({
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
               >
+                
                 <button
                   onClick={() => {
                     setShowCompare(false);
