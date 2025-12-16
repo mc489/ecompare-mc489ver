@@ -612,10 +612,11 @@ function Signup() {
         <div className="w-full">
           <h1
             onClick={() => router.push("/")}
-            className="relative inline-block text-xl font-bold cursor-pointer sm:text-2xl group text-white"
+            className="relative inline-block text-xl font-bold cursor-pointer text-[16px] group text-white"
           >
             Go to home
-            <span className="absolute left-1/2 bottom-0 h-[2px] w-0 bg-white transition-all duration-300 group-hover:w-full group-hover:left-0"></span>
+            <span className="absolute left-1/2 bottom-0 h-[2px] w-0 bg-white transition-all duration-300
+             group-hover:w-full group-hover:left-0"></span>
           </h1>
         </div>
 
@@ -780,7 +781,7 @@ function Signup() {
                   // live validation handled in useEffect
                 }}
                 required
-                className="w-full  rounded-2xl text-white placeholder-white/50 text-[16px]
+                className="w-full  rounded-2xl text-white placeholder-white/50 !text-[16px]
                        font-normal transition-all duration-300  bg-transparent focus:outline-none"
               />
             </div>
@@ -791,13 +792,14 @@ function Signup() {
           </div>
 
           {/* Submit */}
-          <div className="flex flex-col items-center justify-between  sm:gap-10">
+          <div className="flex flex-col items-center justify-between ">
             <div id="clerk-captcha"></div>
             <div className="flex items-center justify-center w-full">
               <button
                 type="submit"
                 disabled={loadingButton !== "" || !isLoaded}
-                className="cursor-pointer !rounded-[16px] px-8 text-lg glass-loginButton !h-[48px] !text-[16px] sm:px-12 font-vagRounded text-white "
+                className="cursor-pointer !rounded-[16px] px-8 text-lg glass-loginButton !h-[48px] 
+                !text-[16px]  font-vagRounded text-white "
               >
                 {loadingButton === "signup" ? (
                   <span className="flex items-center justify-center gap-2">
@@ -825,9 +827,9 @@ function Signup() {
                 {loadingButton === "oauth_google" ? (
                   <VscLoading className="text-3xl sm:text-4xl animate-spin" />
                 ) : (
-                  <FcGoogle className="text-[16px]" />
+                  <FcGoogle className="!text-[16px]" />
                 )}
-                <span className="!text-[16px]">
+                <span className="!text-[14px]">
                   {loadingButton === "oauth_google"
                     ? "Loading..."
                     : "Continue with Google"}
@@ -871,7 +873,7 @@ function Signup() {
                       ></path>
                     </svg>
 
-                    <span className="!text-[16]">
+                    <span className="!text-[14px]">
                       {loadingButton === "oauth_facebook"
                         ? "Loading..."
                         : "Continue with Facebook"}

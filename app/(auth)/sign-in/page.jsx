@@ -452,16 +452,16 @@ function Signin() {
               </p>
             </div>
 
-            <div className="flex flex-col items-center justify-center w-full gap-4 sm:gap-5 text-[16px]">
+            <div className="flex flex-col items-center justify-center w-full gap-4  text-[16px]">
               <button
                 type="button"
                 onClick={() => handleOAuthSignIn("google")}
                 disabled={!isLoaded}
                 className="search-button !h-[48px] cursor-pointer flex flex-row items-center text-white justify-center 
-                w-full gap-2 px-6 !text-[16px]
+                w-full gap-2 px-6 !text-[14px]
                !w-full !rounded-[16px]  font-vagRounded "
               >
-                <FcGoogle className="!text-[16px]" />
+                <FcGoogle className="!text-[14px]" />
                 <span className="">Login with Google</span>
               
               </button>
@@ -473,14 +473,14 @@ function Signin() {
                 type="button"
                 onClick={() => handleOAuthSignIn("facebook")}
                 disabled={!isLoaded}
-              className="search-button cursor-pointer flex flex-row items-center text-white justify-center w-full gap-2 px-6 text-base
+              className="search-button cursor-pointer flex flex-row items-center text-white justify-center w-full  px-6 text-base
                !w-full !rounded-[16px] !h-[48px] sm:w-auto sm:text-xl sm:px-12 font-vagRounded"
               >
                 <div className="p-2 sm:p-1 rounded-md">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 512 512"
-                    className="!w-4 !h-4 sm:w-8 sm:h-8 rounded-md"
+                    className="!w-3 !h-3 sm:w-8 sm:h-8 rounded-md"
                   >
                     <rect width="512" height="512" fill="#1877F2" rx="15" />
                     <path
@@ -489,7 +489,7 @@ function Signin() {
                     />
                   </svg>
                 </div>
-                <span className="!text-[16px]">
+                <span className="!text-[14px]">
                   Login with Facebook
                 </span>
                

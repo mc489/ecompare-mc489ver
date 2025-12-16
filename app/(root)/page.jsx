@@ -125,7 +125,7 @@ function HomePage() {
     {isTabletOrMobile &&
     <>
 
-<div className="!overflow-hidden h-[calc(100vh-140px)] flex "> 
+<div className="!overflow-hidden h-[calc(100vh-180px)] flex "> 
    <div className="!h-full flex !justify-center items-center w-full flex-col gap-5">
           {/* Search Section */}
           <div className="flex flex-row !justify-center !items-center ">

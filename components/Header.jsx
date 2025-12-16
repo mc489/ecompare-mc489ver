@@ -210,11 +210,11 @@ function Header({ visible = false }) {
 
 
         {/* CENTER SEARCH BAR */}
-        <div className="justify-center flex w-[40%] min-w-[100px] relative">
+        <div className="justify-center flex w-[40%] min-w-[50px] relative">
           {isSearchPage && (
             <div className="flex w-full">
               {/* Search Input */}
-              <div className="glass-search relative flex-[22]">
+                 <div className="!h-[24px] glass-search relative flex-[22]">
                 <form onSubmit={handleSearch}>
 
                   <input
@@ -225,12 +225,13 @@ function Header({ visible = false }) {
                     placeholder="Search"
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
-                    className={` w-full h-[48px] rounded-2xl text-white placeholder-white/50 text-[16px] 
+                    className={`!p-0 w-full !h-[28px] rounded-2xl text-white placeholder-white/50 !text-[6px] 
               font-normal transition-all duration-300  
-               ${isFocused ? "!pl-12" : "!pl-4"}
+               ${isFocused ? "!pl-6" : "!pl-3"}
                 }`}
                   />
-                  <FaMagnifyingGlass className={`absolute left-[16px] top-1/2 -translate-y-1/2 text-white/70 text-[16px] transition-all duration-300 z-100 ${isFocused
+                  <FaMagnifyingGlass className={`absolute left-[10px] top-1/2 
+                  -translate-y-1/2 text-white/70 text-[8px] transition-all duration-300 z-100 ${isFocused
                     ? "opacity-100 translate-x-0"
                     : "opacity-0 -translate-x-3"
                     }`}
@@ -242,9 +243,9 @@ function Header({ visible = false }) {
               <div onClick={handleSearch}>
                 <button
                   type="button"
-                  className="flex-[1] h-[48px] search-button flex items-center justify-center rounded-r-2xl px-6"
+                  className=" !h-[24px] search-button flex items-center justify-center rounded-r-2xl px-2"
                 >
-                  <FaMagnifyingGlass className="text-white/70 text-lg" />
+                  <FaMagnifyingGlass className="text-white/70 !text-[8px]" />
                 </button>
               </div>
             </div>
