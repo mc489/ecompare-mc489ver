@@ -641,11 +641,51 @@
   background: none !important;
 }
 
+.big-tablet {
+  border-width: 0.5px;
+  border-style: solid;
+  backdrop-filter: blur(10px);
+  border-image-source: linear-gradient(280deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 1) 50%,
+      rgba(255, 255, 255, 0.05) 100%)!important;
+  border-image-slice: 1;
+  border-image-width: 1;
+  box-shadow: inset 0 0px 4px 0 rgba(255, 255, 255, 0.2),
+    0 2px 4px 0 rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: intersect;
+}
+
+.mobile-bg-m {
+  border-width: 0.5px;
+  border-style: solid;
+  backdrop-filter: blur(10px);
+  border-image-source: linear-gradient(-90deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 1) 50%,
+      rgba(255, 255, 255, 0.05) 100%)!important;
+  border-image-slice: 1;
+  border-image-width: 1;
+  box-shadow: inset 0 0px 4px 0 rgba(255, 255, 255, 0.2),
+    0 2px 4px 0 rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: intersect;
+}
+
 .inner-shadow-y {
   border-width: 0.5px;
   border-style: solid;
   backdrop-filter: blur(10px);
-  border-image-source: linear-gradient(90deg,
+  border-image-source: linear-gradient(180deg,
       rgba(255, 255, 255, 0.05) 0%,
       rgba(255, 255, 255, 1) 50%,
       rgba(255, 255, 255, 0.05) 100%);

@@ -331,7 +331,9 @@ function Signup() {
       </div>
 
       {/* Right Side */}
-      <div className="w-full px-6 py-10 lg:w-1/2 sm:px-10 lg:overflow-y-auto scrollbar !bg-black/20 inner-shadow-y border-l border-gray-500">
+      <div className="w-full px-6 py-10 lg:w-1/2 sm:px-10 lg:overflow-y-auto scrollbar !bg-black/20 
+    
+    inner-shadow-y border-l border-gray-500">
         <form onSubmit={handleSubmit}>
           {/* Email */}
           <div className="mb-7 sm:mb-10">
@@ -492,7 +494,8 @@ function Signup() {
               <button
                 type="submit"
                 disabled={loadingButton !== "" || !isLoaded}
-                className="cursor-pointer px-8 text-lg glass-loginButton  sm:w-auto sm:text-xl sm:px-12 font-vagRounded text-white "
+                className="cursor-pointer px-8 text-lg glass-loginButton  sm:w-auto sm:text-x
+                l sm:px-12 font-vagRounded text-white "
               >
                 {loadingButton === "signup" ? (
                   <span className="flex items-center justify-center gap-2">
@@ -514,12 +517,13 @@ function Signup() {
                 type="button"
                 onClick={() => handleOAuthSignUp("oauth_google")}
                 disabled={loadingButton !== "" || !isLoaded}
-                className="cursor-pointer flex flex-row items-center text-white justify-center gap-2 px-6 text-base glass-button !min-h-[64px] sm:w-auto sm:text-xl sm:px-12 font-vagRounded"
+                className="cursor-pointer flex flex-row items-center text-white justify-center gap-2 px-6
+                 !rounded-[23px] !w-full text-base search-button !h-[64px] !text-lg font-vagRounded"
               >
                 {loadingButton === "oauth_google" ? (
                   <VscLoading className="text-3xl sm:text-4xl animate-spin" />
                 ) : (
-                  <FcGoogle className="text-3xl sm:text-4xl" />
+                  <FcGoogle className="!text-2xl sm:text-4xl" />
                 )}
                 <span className="hidden sm:inline">
                   {loadingButton === "oauth_google"
@@ -536,7 +540,8 @@ function Signup() {
                 type="button"
                 onClick={() => handleOAuthSignUp("oauth_facebook")}
                 disabled={loadingButton !== "" || !isLoaded}
-                className="cursor-pointer flex flex-row items-center justify-center text-white px-6 text-base glass-button !min-h-[64px] sm:w-auto sm:text-xl sm:px-12 font-vagRounded"
+                className="cursor-pointer flex flex-row items-center justify-center text-white px-6 text-base
+                !w-full search-button !rounded-[23px] !min-h-[64px] sm:w-auto sm:text-xl sm:px-12 font-vagRounded"
               >
                 {loadingButton === "oauth_facebook" ? (
                   <VscLoading className="text-3xl sm:text-4xl animate-spin" />
@@ -637,7 +642,7 @@ function Signup() {
       </div>
 
       {/* Right Side */}
-      <div className="w-full px-6 pt-10 lg:w-1/2 sm:px-10 lg:overflow-y-auto scrollbar !bg-black/20 inner-shadow-y border-l border-gray-500">
+      <div className="w-full px-6 pt-10 lg:w-1/2 sm:px-10 lg:overflow-y-auto scrollbar !bg-black/20 mobile-bg-m border-l border-gray-500">
         <form onSubmit={handleSubmit}>
           {/* Email */}
           <div className="mb-7 sm:mb-10">
