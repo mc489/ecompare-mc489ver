@@ -16,6 +16,11 @@ export async function GET(req) {
     });
   }
 
+  // Detect user agent to determine device type
+  const userAgent = req.headers.get("user-agent") || "";
+  const isMobile = /mobile/i.test(userAgent);
+  const deviceType = isMobile ? "mobile" : "desktop";
+
   // Store search query
   if (userId) {
     try {
@@ -28,9 +33,10 @@ export async function GET(req) {
   )}`;
 
   try {
+    // Dynamically set the device parameter based on the user's device
     const scraperUrl = `https://api.scraperapi.com?api_key=${API_KEY}&url=${encodeURIComponent(
       url
-    )}&country=ph&device=desktop&keep_headers=true`;
+    )}&country=ph&device=${deviceType}&keep_headers=true`;
 
     const response = await fetch(scraperUrl);
     const json = await response.json().catch(() => null);

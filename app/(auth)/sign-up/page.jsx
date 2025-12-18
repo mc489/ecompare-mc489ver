@@ -10,9 +10,10 @@ import { Eye, EyeOff } from "lucide-react";
 
 import { useMediaQuery } from 'react-responsive';
 function Signup() {
-
+const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
   
-      const isDesktopOrLaptop = useMediaQuery({ query: '(min-width: 700px)' });
+
+    const isDesktopOrLaptop = useMediaQuery({ query: '(min-width: 1000px)' });
     
       const isTabletOrMobile = useMediaQuery({ query: '(max-width: 699px)' });
   const router = useRouter();
@@ -298,7 +299,9 @@ function Signup() {
 
   // --- Signup Form View ---
   return (
-    <>{
+    <>
+    
+    {
       isDesktopOrLaptop &&
     <>
     <div className="flex flex-col lg:flex-row items-stretch justify-center max-w-screen overflow-x-hidden min-h-screen lg:h-screen text-white">
@@ -605,32 +608,337 @@ function Signup() {
     </div>
     </>
     }
-
-    {
-      isTabletOrMobile &&
+   {
+      Bigtablet &&
     <>
-    <div className="flex flex-col lg:flex-row items-stretch justify-center 
-    max-w-screen overflow-x-hidden min-h-screen lg:h-screen text-white">
-      {/* Left Side */}
-      <div className="min-h-[40vh] lg:min-h-screen w-full lg:w-1/2 px-6
-       sm:px-10 py-5 flex items-center justify-between flex-col sticky top-0">
+  <div className="flex flex-col lg:flex-row items-stretch justify-center !h-[100vh] overflow-x-hidden 
+      text-white ">
+          <div className=" mt-50 !h-[100vh] w-full  px-10  py-5 flex items-center justify-between flex-col  top-0">
         <div className="w-full">
           <h1
             onClick={() => router.push("/")}
-            className="relative inline-block text-xl font-bold cursor-pointer text-[16px] group text-white"
+            className="!mb-15 pt-10 relative inline-block text-[24px] font-vagRounded font-bold cursor-pointer group text-white"
           >
             Go to home
-            <span className="absolute left-1/2 bottom-0 h-[2px] w-0 bg-white transition-all duration-300
-             group-hover:w-full group-hover:left-0"></span>
+            <span className=" absolute left-1/2 bottom-0 h-[2px] w-0 bg-white transition-all duration-300 group-hover:w-full group-hover:left-0"></span>
           </h1>
         </div>
-
         <div className="cursor-default text-center lg:text-left">
-          <h1 className="text-3xl font-bold font-vagRounded sm:text-4xl lg:text-5xl text-white">
+ <h1 className="text-3xl font-bold font-vagRounded sm:text-4xl lg:text-5xl text-white">      Welcome to
+          </h1>
+           <p className="font-baloo text-5xl  sm:text-6xl lg:text-8xl">
+      
+            E-Compare
+          </p>
+           <p className="font-vagRounded text-lg font-regular sm:text-[24px] lg:text-2xl mt-1">
+            Sign up for free.
+          </p>
+        </div>
+        <div className="cursor-default hidden lg:block w-full">
+          <div className="cursor-default hidden lg:block w-full self-end mt-auto mb-[-16px] [&_footer]:!static [&_footer]:!bottom-auto [&_footer]:!left-auto [&_footer]:w-full">
+            <Footer />
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side */}
+       <div className="w-full px-6 py-10 lg:w-1/2 sm:px-10 lg:overflow-y-auto scrollbar !bg-black/20
+      big-tablet border-l border-gray-500">
+        <form onSubmit={handleSubmit}>
+          {/* Email */}
+          <div className="mb-7 sm:mb-10">
+            <p className="mb-3 text-[20px] font-normal text-white font-vagRounded">
+              Email
+            </p>
+
+            <div className="h-[64px] glass-loginInput relative w-full">
+              <input
+                type="text"
+                value={email}
+                // live update + debounced validation
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setEmail(value);
+
+                  // clear previous timer
+                  if (emailDebounceRef.current) {
+                    clearTimeout(emailDebounceRef.current);
+                  }
+
+                  // debounce validation
+                  emailDebounceRef.current = setTimeout(() => {
+                    if (value.trim() === "") {
+                      setEmailError("");
+                    } else if (!validateEmailValue(value)) {
+                      setEmailError("Please enter a valid email address.");
+                    } else {
+                      setEmailError("");
+                    }
+                  }, 800);
+                }}
+
+                onBlur={() => {
+                  if (emailDebounceRef.current) {
+                    clearTimeout(emailDebounceRef.current);
+                  }
+
+                  if (email.trim() === "") {
+                    setEmailError("");
+                  } else if (!validateEmailValue(email)) {
+                    setEmailError("Please enter a valid email address.");
+                  } else {
+                    setEmailError("");
+                  }
+                }}
+                required
+                className="w-full h-full  text-white placeholder-white/50 text-[16px] 
+               font-normal transition-all duration-300  focus:outline-none"
+                placeholder="jeacodes@email.com"
+              />
+            </div>
+
+            {/* Option B: smaller, lighter text under input */}
+            {emailError && (
+              <p className="text-white/70 text-sm mt-1">{emailError}</p>
+            )}
+          </div>
+
+          {/* Username */}
+          <div className="mb-7 sm:mb-10">
+            <p className="mb-3 text-[20px] font-normal text-white font-vagRounded">
+              Username
+            </p>
+
+            <div className="h-[64px] glass-loginInput relative w-full">
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setUsername(v);
+                  if (v.trim().length === 0) {
+                    setUsernameError("");
+                  } else if (v.trim().length < 8) {
+                    setUsernameError("Username must be at least 8 characters long.");
+                  } else {
+                    setUsernameError("");
+                  }
+                }}
+                required
+                className="w-full h-full  text-white placeholder-white/50 text-[16px] 
+               font-normal transition-all duration-300  focus:outline-none"
+                placeholder="jeacodes23"
+              />
+            </div>
+
+            {usernameError && (
+              <p className="text-white/70 text-sm mt-1">{usernameError}</p>
+            )}
+          </div>
+
+          {/* Password */}
+          <div className="mb-7">
+            <p className="mb-3 text-[20px] font-normal text-white font-vagRounded">
+              Password
+            </p>
+
+            <div className="h-[64px] glass-loginInput relative w-full">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setPassword(v);
+                  // live validation is handled in useEffect
+                }}
+                required
+                className="w-full  rounded-2xl text-white placeholder-white/50 text-[16px]
+                       font-normal transition-all duration-300  bg-transparent focus:outline-none"
+                placeholder="········"
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-6 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+              </button>
+            </div>
+
+            {passwordError && (
+              <p className="text-white/70 text-sm mt-1">{passwordError}</p>
+            )}
+          </div>
+
+          {/* Confirm Password */}
+          <div className="mb-7">
+            <p className="mb-3 text-[20px] font-normal text-white  font-vagRounded">
+              Confirm Password
+            </p>
+            <div className="h-[64px] glass-loginInput relative w-full">
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setConfirmPassword(v);
+                  // live validation handled in useEffect
+                }}
+                required
+                className="w-full  rounded-2xl text-white placeholder-white/50 text-[16px]
+                       font-normal transition-all duration-300  bg-transparent focus:outline-none"
+              />
+            </div>
+
+            {confirmPasswordError && (
+              <p className="text-white/70 text-sm mt-1">{confirmPasswordError}</p>
+            )}
+          </div>
+
+          {/* Submit */}
+          <div className="flex flex-col items-center justify-between gap-8 sm:gap-10">
+            <div id="clerk-captcha"></div>
+            <div className="flex items-center justify-center w-full">
+              <button
+                type="submit"
+                disabled={loadingButton !== "" || !isLoaded}
+                className="cursor-pointer px-8 text-lg glass-loginButton  sm:w-auto sm:text-x
+                l sm:px-12 font-vagRounded text-white "
+              >
+                {loadingButton === "signup" ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <VscLoading className="animate-spin" />
+                    Signing up...
+                  </span>
+                ) : (
+                  "Sign up"
+                )}
+              </button>
+            </div>
+
+            <p className="text-xl text-center sm:text-2xl text-white">or</p>
+
+            {/* OAuth Buttons */}
+            <div className="flex flex-col items-center justify-center w-full gap-4 sm:gap-5">
+              {/* Google */}
+              <button
+                type="button"
+                onClick={() => handleOAuthSignUp("oauth_google")}
+                disabled={loadingButton !== "" || !isLoaded}
+                className="cursor-pointer flex flex-row items-center text-white justify-center gap-2 px-6
+                 !rounded-[23px] !w-full text-base search-button !h-[64px] !text-lg font-vagRounded"
+              >
+                {loadingButton === "oauth_google" ? (
+                  <VscLoading className="text-3xl sm:text-4xl animate-spin" />
+                ) : (
+                  <FcGoogle className="!text-2xl sm:text-4xl" />
+                )}
+                <span className="hidden sm:inline">
+                  {loadingButton === "oauth_google"
+                    ? "Loading..."
+                    : "Continue with Google"}
+                </span>
+                <span className="sm:hidden">
+                  {loadingButton === "oauth_google" ? "Loading..." : "Google"}
+                </span>
+              </button>
+
+              {/* Facebook */}
+              <button
+                type="button"
+                onClick={() => handleOAuthSignUp("oauth_facebook")}
+                disabled={loadingButton !== "" || !isLoaded}
+                className="cursor-pointer flex flex-row items-center justify-center text-white px-6 text-base
+                !w-full search-button !rounded-[23px] !min-h-[64px] sm:w-auto sm:text-xl sm:px-12 font-vagRounded"
+              >
+                {loadingButton === "oauth_facebook" ? (
+                  <VscLoading className="text-3xl sm:text-4xl animate-spin" />
+                ) : (
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="32"
+                      viewBox="0 0 48 48"
+                      className="sm:w-[38px] sm:h-[38px]"
+                    >
+                      <path
+                        fill="#039be5"
+                        d="M24 5A19 19 0 1 0 24 43A19 19 0 1 0 24 5Z"
+                      ></path>
+                      <path
+                        fill="#fff"
+                        d="M26.572,29.036h4.917l0.772-4.995h-5.69v-2.73
+                        c0-2.075,0.678-3.915,2.619-3.915h3.119v-4.359
+                        c-0.548-0.074-1.707-0.236-3.897-0.236
+                        c-4.573,0-7.254,2.415-7.254,7.917v3.323h-4.701v4.995h4.701
+                        v13.729C22.089,42.905,23.032,43,24,43
+                        c0.875,0,1.729-0.08,2.572-0.194V29.036z"
+                      ></path>
+                    </svg>
+
+                    <span className="hidden sm:inline">
+                      {loadingButton === "oauth_facebook"
+                        ? "Loading..."
+                        : "Continue with Facebook"}
+                    </span>
+                    <span className="sm:hidden">
+                      {loadingButton === "oauth_facebook"
+                        ? "Loading..."
+                        : "Facebook"}
+                    </span>
+                  </div>
+                )}
+              </button>
+            </div>
+
+            {/* Login link */}
+            <p className="font-sans text-sm text-center text-white sm:text-base">
+              Already have an account?{" "}
+              <span
+                onClick={() => loadingButton === "" && router.push("/sign-in")}
+                className={`font-bold text-white underline underline-offset-2 ${loadingButton === "" ? "cursor-pointer" : "cursor-not-allowed opacity-50"
+                  }`}
+              >
+                Login
+              </span>
+            </p>
+          </div>
+        </form>
+
+        <div className="cursor-default mt-8 text-center lg:hidden">
+          <p className="text-lg font-bold">by Jeacodes</p>
+        </div>
+      </div>
+    </div>
+    </>
+    }
+    {
+      isTabletOrMobile &&
+    <>
+    <div className="flex flex-col l items-stretch justify-center 
+    max-w-screen overflow-x-hidden min-h-screen lg:h-screen text-white">
+      <div className= " w-full lg:w-1/2 px-6 sm:px-10 py-5 flex items-center justify-between flex-col sticky top-0">
+        <div className=" mb-15 w-full">
+          <h1
+            onClick={() => router.push("/")}
+            className="mt-5 relative inline-block text-[16px] font-vagRounded font-bold cursor-pointer group text-white"
+          >
+            Go to home
+            <span className="absolute left-1/2 bottom-0 h-[2px] 
+            w-0 bg-white transition-all duration-300 group-hover:w-full group-hover:left-0"></span>
+          </h1>
+        </div>
+        <div className="cursor-default text-center">
+          <h1 className="text-[16px] font-bold font-vagRounded sm:text-4xl lg:text-5xl text-white">
             Welcome to
           </h1>
-          <p className="font-baloo text-5xl sm:text-6xl lg:text-8xl">E-Compare</p>
-          <p className="font-semibold font-vagRounded text-lg sm:text-xl lg:text-2xl mt-2">
+          <p className="font-baloo text-[50px]">
+            E-Compare
+          </p>
+       <p className="font-vagRounded text-[12px] font-regular sm:text-[24px] lg:text-2xl mt-1">
             Sign up for free.
           </p>
         </div>
