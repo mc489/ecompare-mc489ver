@@ -12,12 +12,20 @@ import { TrendingUpDown } from "lucide-react";
 import CompareSkeleton from "./CompareSkeleton";
 import Link from "next/link";
 
+  
+
+import { useMediaQuery } from 'react-responsive';
 function SearchResults({
   query,
   onToggleHeader,
   setIsComparisonView,
   sortBy = "Best Match",
 }) {
+
+  
+    const isDesktopOrLaptop = useMediaQuery({ query: '(min-width: 700px)' });
+    
+      const isTabletOrMobile = useMediaQuery({ query: '(max-width: 699px)' });
   const [aiReply, setAiReply] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const targetRef = useRef(null);
@@ -448,7 +456,8 @@ function SearchResults({
 
   return (
     <>
-    
+  {isDesktopOrLaptop &&
+  <>
       {!showComparisonTable && (
         <motion.div
           key="motion-container"
@@ -1002,7 +1011,567 @@ function SearchResults({
           <span className="ml-2 text-white/70 text-sm">(Click to reopen)</span>
         </motion.div>
       )}
-    </>
+  </>}
+  
+   {isTabletOrMobile &&
+  <>
+      {!showComparisonTable && (
+        <motion.div
+          key="motion-container"
+          initial={false}
+          animate={
+            
+            showCompare
+              ? { y: 0, backdropFilter: "blur(35px)" }
+              : { y: 0, backdropFilter: "blur(0px)" }
+          }
+          transition={{ type: "spring", stiffness: 200, damping: 25 }}
+          className={`relative z-30 min-h-screen ${
+            showCompare ? "inner-shadow-y" : "bg-transparent"
+          }`}
+          style={{ top: "5px", overflow: "visible" }}
+        >
+          {/* ✕ and ━ Buttons */}
+          <AnimatePresence>
+            {showCompare && showClose && (
+              <motion.div
+                key="top-buttons"
+                className="absolute top-4 right-8 flex gap-4 z-[101]"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: -5 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+              >
+                
+                <button
+                  onClick={() => {
+                    setShowCompare(false);
+                    setSelectedProducts([]);
+                    setIsMinimized(false);
+                    minimizedSnapshot.current = [];
+                  }}
+                  className="text-white text-[20px] font-vagRounded font-light cursor-pointer"
+                  title="Close"
+                >
+                  ✕
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="text-center px-8 pt-15 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+            {loading ? (
+              // <div className="col-span-full flex flex-col justify-center items-center gap-4 min-h-[60vh]">
+              //   <motion.div
+              //     animate={{ rotate: 360 }}
+              //     transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+              //     className="w-12 h-12 border-4 border-t-white border-gray-400 rounded-full"
+              //   />
+              //   <p className="text-white text-lg font-vagRounded tracking-wide">
+              //     Loading Products...
+              //   </p>
+              // </div>
+              <SkeletonResult />
+            ) : error ? (
+              <p className="text-center text-red-400 font-vagRounded mt-10">
+                {error}
+              </p>
+            ) : (
+              products.map((product) => (
+                <Card
+                  key={product.id}
+                  showCompare={showCompare}
+                  products={product}
+                  isSelected={selectedProducts.includes(product.id)}
+                  onToggle={() => handleToggle(product.id)}
+                  isDisabled={
+                    selectedProducts.length >= 3 &&
+                    !selectedProducts.includes(product.id)
+                  }
+                  isLiked={likedProducts.some((item) => item.id === product.id)}
+                  onLikeToggle={(isLiked) => {
+                    setLikedProducts((prev) =>
+                      isLiked
+                        ? [...prev, product]
+                        : prev.filter((p) => p.id !== product.id)
+                    );
+                  }}
+                />
+              ))
+            )}
+          </div>
+        </motion.div>
+      )}
+
+      {showComparisonTable && (
+        <motion.div
+          ref={targetRef}
+          key="comparison-view"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="backdrop-blur-lg border border-white/20 relative w-full min-h-screen p-0 text-white flex flex-col overflow-hidden z-40"
+        >
+          <motion.div
+            key="top-buttons"
+            className="absolute top-4 right-10 flex gap-4 z-[101]"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: -5 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* ━ Minimize */}
+            <button
+              onClick={() => {
+                minimizedSnapshot.current = [...selectedProducts];
+                setIsMinimized(true);
+                setShowComparisonTable(false);
+                setShowCompare(true);
+              }}
+              className="text-white text-[26px] font-vagRounded font-light cursor-pointer"
+              title="Minimize"
+            >
+              ━
+            </button>
+
+            {/* ✕ Close */}
+            <button
+              onClick={() => {
+                setShowCompare(false);
+                setShowComparisonTable(false);
+                setSelectedProducts([]);
+                setIsMinimized(false);
+                setComparisonResults([]);
+                setSelectedVariations({});
+                minimizedSnapshot.current = [];
+              }}
+              className="text-white text-[36px] font-vagRounded font-light cursor-pointer"
+              title="Close"
+            >
+              ✕
+            </button>
+          </motion.div>
+          <h2 className="text-2xl font-bold mb-8 text-center z-10 mt-16">
+            Product Comparison
+          </h2>
+          {loadingCompare ? (
+            <div className="  grid grid-cols-3 w-3/4 mx-auto gap-4">
+              <CompareSkeleton />
+              {/* <div className="overflow-x-hidden overflow-hidden relative z-10">
+                <div className="pb-5 w-3/4 mx-auto flex gap-4">
+                  {comparisonResults.map((result, index) => {
+                    const p = products.find(
+                      (x) => x.id === selectedProducts[index]
+                    );
+                    const selectedVar = selectedVariations[p?.id];
+                    const displayPrice = selectedVar
+                      ? selectedVar.price
+                      : `${result.lowestPrice} - ${result.highestPrice}`;
+
+                    return (
+                      <div
+                        key={p?.id || index}
+                        className="flex flex-col flex-1 min-w-[220px]"
+                      >
+                        <div className="glass-button1 rounded-t-[23px]">
+                          <div className="flex justify-center items-center flex-col p-4">
+                            <img
+                              crossOrigin="anonymous"
+                              src={p?.image}
+                              alt={result.title}
+                              className="w-32 h-32 object-contain rounded-lg"
+                            />
+                            <p className="font-semibold text-center mt-3">
+                              {result.title}
+                            </p>
+                            {result.brand && (
+                              <p className="text-xs text-white/60 mt-1">
+                                {result.brand}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="glass-button1 h-16 rounded-0 flex items-center justify-center text-center">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-xs opacity-60">
+                              Price
+                            </span>
+                            <span>₱{displayPrice}</span>
+                          </div>
+                        </div>
+
+                        <div className="glass-button1 h-16 rounded-0 flex items-center justify-center text-center">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-xs opacity-60">
+                              Rating
+                            </span>
+                            <span>{result.rating || "-"} ⭐</span>
+                          </div>
+                        </div>
+
+                        <div className="glass-button1 h-16 rounded-0 flex items-center justify-center text-center">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-xs opacity-60">
+                              Source
+                            </span>
+                            <span>{p?.source || "-"}</span>
+                          </div>
+                        </div>
+
+                        <div className="glass-button1 min-h-24 rounded-0 flex items-center justify-center text-center p-3">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-xs opacity-60">
+                              Description
+                            </span>
+                            <span className="text-xs mt-1 line-clamp-3">
+                              {result.description || "-"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="glass-button1 py-3 min-h-16 h-auto rounded-0 flex flex-col items-center justify-center text-center relative">
+                          <span className="font-semibold text-xs opacity-60 mb-2">
+                            Variations
+                          </span>
+                          <Dropdown
+                            options={result.variations.map(
+                              (variation) =>
+                                `${variation.name} — ₱${variation.price}`
+                            )}
+                            onChange={(option) => {
+                              const [name] = option.value.split(" — ₱");
+                              const selected = result.variations.find(
+                                (v) => v.name === name
+                              );
+                              setSelectedVariations((prev) => ({
+                                ...prev,
+                                [p.id]: selected,
+                              }));
+                            }}
+                            value={
+                              selectedVar
+                                ? `${selectedVar.name} — ₱${selectedVar.price}`
+                                : "Select variation "
+                            }
+                            placeholder="Select a variation"
+                            className="w-full text-sm font-vagRounded"
+                            controlClassName=""
+                            menuClassName="!absolute !static !rounded-none !bg-[rgba(255,255,255,0.01)] !backdrop-blur-none"
+                            arrowClassName="text-white"
+                          />
+                        </div>
+
+                        <div className="text-center pt-6">
+                          <button
+                            onClick={() =>
+                              window.open(
+                                p?.source === "Lazada"
+                                  ? "https://www.lazada.com.ph/"
+                                  : "https://shopee.ph/",
+                                "_blank"
+                              )
+                            }
+                            className={`${
+                              p?.source === "Lazada"
+                                ? "bg-pink-700/20 hover:bg-pink-800/20"
+                                : "bg-orange-700/20 hover:bg-orange-800/20"
+                            } text-white text-sm px-5 py-2 rounded-full shadow-md compare-button1`}
+                          >
+                            Buy Now
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div> */}
+            </div>
+          ) : (
+            <>
+              <div className="overflow-x-hidden overflow-hidden relative z-10">
+                <div className="w-3/4 mx-auto flex gap-4">
+                  {comparisonResults.map((result, index) => {
+                    const p = products.find(
+                      (x) => x.id === selectedProducts[index]
+                    );
+
+                    if (!result || result.error) {
+                      return (
+                        <div
+                          key={p?.id || index}
+                          className="flex flex-col flex-1 min-w-[220px] pb-5"
+                        >
+                          <div className="glass-button1 rounded-[23px] h-full min-h-[600px] flex flex-col items-center justify-center p-6 text-center gap-4 border border-red-500/30">
+                            {p?.image && (
+                              <img
+                                src={p.image}
+                                className="w-24 h-24 object-contain opacity-50 grayscale rounded-lg"
+                                alt="Unavailable"
+                              />
+                            )}
+                            <div>
+                              <p className="font-bold text-red-300 text-lg">
+                                Data Unavailable
+                              </p>
+                              <p className="text-sm text-white/60 mt-1">
+                                We couldn't fetch the latest details for this
+                                item.
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => window.open(p?.link, "_blank")}
+                              className="bg-white/10 hover:bg-white/20 text-white text-sm px-4 py-2 rounded-full transition-colors"
+                            >
+                              View on Store
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    const variations = result?.variations || [];
+                    let minPrice = null;
+                    let maxPrice = null;
+
+                    if (variations.length > 0) {
+                      const prices = variations
+                        .map((v) => Number(v.price))
+                        .filter((v) => !isNaN(v));
+
+                      if (prices.length > 0) {
+                        minPrice = Math.min(...prices);
+                        maxPrice = Math.max(...prices);
+                      }
+                    }
+
+                    const selectedVar = selectedVariations[p?.id];
+                    const variationPrice =
+                      selectedVar && !isNaN(Number(selectedVar.price))
+                        ? Number(selectedVar.price)
+                        : null;
+
+                    let displayPrice = "-";
+                    if (variationPrice !== null) {
+                      displayPrice = variationPrice;
+                    } else if (minPrice !== null && maxPrice !== null) {
+                      displayPrice =
+                        minPrice === maxPrice
+                          ? `${minPrice}`
+                          : `${minPrice} - ${maxPrice}`;
+                    }
+
+                    return (
+                      <div
+                        key={p?.id || index}
+                        className="flex flex-col flex-1 min-w-[220px] pb-5"
+                      >
+                        <Link href={p?.link} target="_blank">
+                          <div className="glass-button1 rounded-t-[23px] min-h-[250px]">
+                            <div className="flex justify-center items-center flex-col p-4">
+                              <img
+                                crossOrigin="anonymous"
+                                src={p?.image}
+                                alt={result.title}
+                                className="w-32 h-32 object-contain rounded-lg"
+                              />
+                              <p className="font-semibold line-clamp-2 text-ellipsis overflow-hidden text-center mt-3">
+                                {result.title}
+                              </p>
+                              {result.brand && (
+                                <p className="text-xs text-white/60 mt-1">
+                                  {result.brand}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </Link>
+
+                        <div className="glass-button1 h-16 rounded-0 flex items-center justify-center text-center">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-xs opacity-60 ">
+                              Price
+                            </span>
+                            <span>₱{displayPrice}</span>
+                          </div>
+                        </div>
+
+                        <div className="glass-button1 h-16 rounded-0 flex items-center justify-center text-center">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-xs opacity-60">
+                              Rating
+                            </span>
+                            <span>{result.rating || "-"} ⭐</span>
+                          </div>
+                        </div>
+
+                        <div className="glass-button1 h-16 rounded-0 flex items-center justify-center text-center">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-xs opacity-60">
+                              Store
+                            </span>
+                            <span>{p?.source || "-"}</span>
+                          </div>
+                        </div>
+
+                        <div className="glass-button1 min-h-24 rounded-0 flex items-center justify-center text-center p-3">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-xs opacity-60">
+                              Description
+                            </span>
+                            <span className="text-xs mt-1 line-clamp-3 text-ellipsis overflow-hidden">
+                              {result.description || "-"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="glass-button1 py-3 min-h-16 h-auto rounded-0 flex flex-col items-center justify-center text-center relative">
+                          <span className="font-semibold text-xs opacity-60 mb-2">
+                            Variations
+                          </span>
+                          <Dropdown
+                            // ✅ FIXED: Using the safe local 'variations' array
+                            options={variations.map(
+                              (variation) =>
+                                `${variation.name} — ₱${variation.price}`
+                            )}
+                            onChange={(option) => {
+                              const [name] = option.value.split(" — ₱");
+                              const selected = variations.find(
+                                (v) => v.name === name
+                              );
+                              setSelectedVariations((prev) => ({
+                                ...prev,
+                                [p.id]: selected,
+                              }));
+                            }}
+                            value={
+                              selectedVar
+                                ? `${selectedVar.name} — ₱${selectedVar.price}`
+                                : "Select variation "
+                            }
+                            placeholder="Select a variation"
+                            className="w-full text-sm font-vagRounded"
+                            controlClassName="Dropdown-control !w-full"
+                            menuClassName="Dropdown-menu !absolute !static !w-full rounded-none "
+                            arrowClassName="text-white"
+                          />
+                        </div>
+
+                        <div className="text-center pt-6">
+                          <button
+                            onClick={() => window.open(p?.link, "_blank")}
+                            className={`
+                              glass-button1
+                              rounded-full shadow-md compare-button1 text-white text-sm px-5 py-2
+                            `}
+                          >
+                            Buy Now
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {selectedProducts.length === 2 && (
+                <span
+                  onClick={() => {
+                    setLockedProducts([...selectedProducts]);
+                    setIsAddingOneMore(true);
+                    setShowComparisonTable(false);
+                    setShowCompare(true);
+                  }}
+                  className="absolute top-[180px] right-[40px] text-white/80 text-[15px] 
+                     font-medium hover:text-gray-300 cursor-pointer select-none z-50"
+                >
+                  + Add 1 more item
+                </span>
+              )}
+            </>
+          )}
+        </motion.div>
+      )}
+
+      <div className="pb-[100px] pr-[8px] fixed bottom-5 right-5 flex flex-col items-end gap-3 z-50">
+        {!showCompare && !isMinimized && !showComparisonTable && (
+          <button
+            onClick={() => setShowCompare(true)}
+            className="compare-button transition-all text-center text-[16px] text-white rounded-full font-bold w-[150px] h-[40px]"
+          >
+            Compare
+          </button>
+        )}
+        {showCompare && !showComparisonTable && !isAddingOneMore && (
+          <div className="flex flex-col items-center gap-3">
+            <div className="text-white text-[12px] font-semibold bg-black/60
+             px-4 py-2 rounded-full shadow-md flex justify-center items-center">
+              {selectedProducts.length}/3
+            </div>
+
+            <button
+              disabled={
+                selectedProducts.length < 2 || selectedProducts.length > 3
+              }
+              onClick={async () => {
+                await CompareAction();
+                setShowComparisonTable(true);
+              }}
+              className={`text-center text-[16px]
+                rounded-full font-bold  w-[150px] h-[40px] compare-button ${
+                selectedProducts.length >= 2 && selectedProducts.length <= 3
+                  ? "text-white bg-blue-500 hover:bg-black-200"
+                  : "text-gray-300 bg-gray-300 cursor-not-allowed pointer-events-none"
+              }`}
+            >
+              Compare Now
+            </button>
+          </div>
+        )}
+        {showComparisonTable && (
+          <PopoverDemo
+            compareId={compareid}
+            results={comparisonResults}
+            aiReply={aiReply}
+            setAiReply={setAiReply}
+            aiLoading={aiLoading}
+            setAiLoading={setAiLoading}
+            images={selectedImages}
+          />
+        )}
+      </div>
+      {isMinimized && minimizedSnapshot.current.length >= 2 && (
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -50 }}
+          className="absolute top-30 left-5 bg-white/10 backdrop-blur-md rounded-full flex 
+        items-center gap-2 p-3 pl-5 shadow-lg border border-white/20 cursor-pointer z-50"
+          onClick={() => {
+            setShowCompare(true);
+            setIsMinimized(false);
+            setShowComparisonTable(true);
+            setSelectedProducts(minimizedSnapshot.current);
+          }}
+        >
+          {minimizedSnapshot.current.map((id) => {
+            const p = products.find((x) => x.id === id);
+            return (
+              <img
+                crossOrigin="anonymous"
+                key={p.id}
+                src={p.image}
+                alt={p.name}
+                className="w-8 h-8 rounded-lg border border-white/30"
+              />
+            );
+          })}
+          <span className="ml-2 text-white/70 text-sm">(Click to reopen)</span>
+        </motion.div>
+      )}
+  </>}
+  </>
   );
 }
 export default SearchResults;

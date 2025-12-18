@@ -610,27 +610,28 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
     }
    {
       Bigtablet &&
-    <>
-  <div className="flex flex-col lg:flex-row items-stretch justify-center !h-[100vh] overflow-x-hidden 
-      text-white ">
-          <div className=" mt-50 !h-[100vh] w-full  px-10  py-5 flex items-center justify-between flex-col  top-0">
-        <div className="w-full">
+   <>
+    <div className="flex flex-col l items-stretch justify-center 
+    max-w-screen overflow-x-hidden min-h-screen lg:h-screen text-white">
+      <div className= " w-full lg:w-1/2 px-6 sm:px-10 py-5 flex items-center justify-between flex-col sticky top-0">
+        <div className=" mb-15 w-full">
           <h1
             onClick={() => router.push("/")}
-            className="!mb-15 pt-10 relative inline-block text-[24px] font-vagRounded font-bold cursor-pointer group text-white"
+            className="mt-5 relative inline-block text-[16px] font-vagRounded font-bold cursor-pointer group text-white"
           >
             Go to home
-            <span className=" absolute left-1/2 bottom-0 h-[2px] w-0 bg-white transition-all duration-300 group-hover:w-full group-hover:left-0"></span>
+            <span className="absolute left-1/2 bottom-0 h-[2px] 
+            w-0 bg-white transition-all duration-300 group-hover:w-full group-hover:left-0"></span>
           </h1>
         </div>
-        <div className="cursor-default text-center lg:text-left">
- <h1 className="text-3xl font-bold font-vagRounded sm:text-4xl lg:text-5xl text-white">      Welcome to
+        <div className="cursor-default text-center">
+          <h1 className="text-[16px] font-bold font-vagRounded sm:text-4xl lg:text-5xl text-white">
+            Welcome to
           </h1>
-           <p className="font-baloo text-5xl  sm:text-6xl lg:text-8xl ">
-      
+          <p className="font-baloo text-[50px]">
             E-Compare
           </p>
-           <p className="font-vagRounded text-lg font-regular sm:text-[24px] lg:text-2xl mt-1">
+       <p className="font-vagRounded text-[12px] font-regular sm:text-[24px] lg:text-2xl mt-1">
             Sign up for free.
           </p>
         </div>
@@ -642,18 +643,18 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
       </div>
 
       {/* Right Side */}
-       <div className="w-full px-6 py-10 lg:w-1/2 sm:px-10 lg:overflow-y-auto scrollbar !bg-black/20
-      big-tablet border-l border-gray-500">
+      <div className="w-full px-6 pt-10 lg:w-1/2 sm:px-10 lg:overflow-y-auto scrollbar !bg-black/20 mobile-bg-m border-l border-gray-500">
         <form onSubmit={handleSubmit}>
           {/* Email */}
           <div className="mb-7 sm:mb-10">
-            <p className="mb-3 text-[20px] font-normal text-white font-vagRounded">
+            <p className="mb-3 !text-[14px] font-normal text-white font-vagRounded">
               Email
             </p>
 
-            <div className="h-[64px] glass-loginInput relative w-full">
+            <div className="!h-[48px] glass-loginInput relative w-full">
               <input
                 type="text"
+                
                 value={email}
                 // live update + debounced validation
                 onChange={(e) => {
@@ -691,7 +692,7 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
                   }
                 }}
                 required
-                className="w-full h-full  text-white placeholder-white/50 text-[16px] 
+                className="!text-[14px] w-full h-full  text-white placeholder-white/50  
                font-normal transition-all duration-300  focus:outline-none"
                 placeholder="jeacodes@email.com"
               />
@@ -705,11 +706,11 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
 
           {/* Username */}
           <div className="mb-7 sm:mb-10">
-            <p className="mb-3 text-[20px] font-normal text-white font-vagRounded">
+            <p className="mb-3 !text-[14px] font-normal text-white font-vagRounded">
               Username
             </p>
 
-            <div className="h-[64px] glass-loginInput relative w-full">
+            <div className="!h-[48px]  glass-loginInput relative w-full">
               <input
                 type="text"
                 value={username}
@@ -725,7 +726,7 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
                   }
                 }}
                 required
-                className="w-full h-full  text-white placeholder-white/50 text-[16px] 
+                className="!text-[14px] w-full h-full  text-white placeholder-white/50 text-[16px] 
                font-normal transition-all duration-300  focus:outline-none"
                 placeholder="jeacodes23"
               />
@@ -738,11 +739,11 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
 
           {/* Password */}
           <div className="mb-7">
-            <p className="mb-3 text-[20px] font-normal text-white font-vagRounded">
+            <p className="mb-3 text-[14px] font-normal text-white font-vagRounded">
               Password
             </p>
 
-            <div className="h-[64px] glass-loginInput relative w-full">
+            <div className="!h-[48px] glass-loginInput relative w-full">
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
@@ -752,7 +753,7 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
                   // live validation is handled in useEffect
                 }}
                 required
-                className="w-full  rounded-2xl text-white placeholder-white/50 text-[16px]
+                className="w-full  rounded-2xl text-white placeholder-white/50 !text-[14px]
                        font-normal transition-all duration-300  bg-transparent focus:outline-none"
                 placeholder="········"
               />
@@ -763,7 +764,7 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
                 className="absolute right-6 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
 
@@ -774,10 +775,10 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
 
           {/* Confirm Password */}
           <div className="mb-7">
-            <p className="mb-3 text-[20px] font-normal text-white  font-vagRounded">
+            <p className="mb-3 text-[14px] font-normal text-white  font-vagRounded">
               Confirm Password
             </p>
-            <div className="h-[64px] glass-loginInput relative w-full">
+            <div className="!h-[48px] glass-loginInput relative w-full">
               <input
                 type="password"
                 value={confirmPassword}
@@ -787,7 +788,7 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
                   // live validation handled in useEffect
                 }}
                 required
-                className="w-full  rounded-2xl text-white placeholder-white/50 text-[16px]
+                className="w-full  rounded-2xl text-white placeholder-white/50 !text-[16px]
                        font-normal transition-all duration-300  bg-transparent focus:outline-none"
               />
             </div>
@@ -798,14 +799,14 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
           </div>
 
           {/* Submit */}
-          <div className="flex flex-col items-center justify-between gap-8 sm:gap-10">
+          <div className="flex flex-col items-center justify-between ">
             <div id="clerk-captcha"></div>
             <div className="flex items-center justify-center w-full">
               <button
                 type="submit"
                 disabled={loadingButton !== "" || !isLoaded}
-                className="cursor-pointer px-8 text-lg glass-loginButton  sm:w-auto sm:text-x
-                l sm:px-12 font-vagRounded text-white "
+                className="cursor-pointer !rounded-[16px] px-8 text-lg glass-loginButton !h-[48px] 
+                !text-[16px]  font-vagRounded text-white "
               >
                 {loadingButton === "signup" ? (
                   <span className="flex items-center justify-center gap-2">
@@ -818,7 +819,7 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
               </button>
             </div>
 
-            <p className="text-xl text-center sm:text-2xl text-white">or</p>
+            <p className="mt-5 mb-5 !text-[16px] text-center sm:text-2xl text-white">or</p>
 
             {/* OAuth Buttons */}
             <div className="flex flex-col items-center justify-center w-full gap-4 sm:gap-5">
@@ -827,22 +828,22 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
                 type="button"
                 onClick={() => handleOAuthSignUp("oauth_google")}
                 disabled={loadingButton !== "" || !isLoaded}
-                className="cursor-pointer flex flex-row items-center text-white justify-center gap-2 px-6
-                 !rounded-[23px] !w-full text-base search-button !h-[64px] !text-lg font-vagRounded"
+                className="cursor-pointer flex flex-row items-center text-white justify-center gap-2 px-6 
+                !rounded-[16px] search-button !h-[48px] !w-full font-vagRounded"
               >
                 {loadingButton === "oauth_google" ? (
                   <VscLoading className="text-3xl sm:text-4xl animate-spin" />
                 ) : (
-                  <FcGoogle className="!text-2xl sm:text-4xl" />
+                  <FcGoogle className="!text-[16px]" />
                 )}
-                <span className="hidden sm:inline">
+                <span className="!text-[14px]">
                   {loadingButton === "oauth_google"
                     ? "Loading..."
                     : "Continue with Google"}
                 </span>
-                <span className="sm:hidden">
-                  {loadingButton === "oauth_google" ? "Loading..." : "Google"}
-                </span>
+           
+                
+                
               </button>
 
               {/* Facebook */}
@@ -850,19 +851,19 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
                 type="button"
                 onClick={() => handleOAuthSignUp("oauth_facebook")}
                 disabled={loadingButton !== "" || !isLoaded}
-                className="cursor-pointer flex flex-row items-center justify-center text-white px-6 text-base
-                !w-full search-button !rounded-[23px] !min-h-[64px] sm:w-auto sm:text-xl sm:px-12 font-vagRounded"
+                className="cursor-pointer flex flex-row items-center justify-center text-white px-6 !text-[16px]
+                !w-full !rounded-[16px] search-button !h-[48px]  font-vagRounded"
               >
                 {loadingButton === "oauth_facebook" ? (
                   <VscLoading className="text-3xl sm:text-4xl animate-spin" />
                 ) : (
-                  <div className="flex items-center gap-1 sm:gap-2">
+                  <div className="flex items-center gap-2">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="32"
                       height="32"
                       viewBox="0 0 48 48"
-                      className="sm:w-[38px] sm:h-[38px]"
+                      className="!w-[16px] !h-[16px]"
                     >
                       <path
                         fill="#039be5"
@@ -879,27 +880,25 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
                       ></path>
                     </svg>
 
-                    <span className="hidden sm:inline">
+                    <span className="!text-[14px]">
                       {loadingButton === "oauth_facebook"
                         ? "Loading..."
                         : "Continue with Facebook"}
                     </span>
-                    <span className="sm:hidden">
-                      {loadingButton === "oauth_facebook"
-                        ? "Loading..."
-                        : "Facebook"}
-                    </span>
+                  
                   </div>
                 )}
               </button>
             </div>
 
             {/* Login link */}
-            <p className="font-sans text-sm text-center text-white sm:text-base">
+            <p className="mt-4 !font-vagrounded !text-[12px] text-center ">
               Already have an account?{" "}
               <span
                 onClick={() => loadingButton === "" && router.push("/sign-in")}
-                className={`font-bold text-white underline underline-offset-2 ${loadingButton === "" ? "cursor-pointer" : "cursor-not-allowed opacity-50"
+                className=
+                {`!mb-5 font-bold text-white underline underline-offset-2 ${loadingButton === "" ? 
+                  "cursor-pointer" : " cursor-not-allowed opacity-50"
                   }`}
               >
                 Login
@@ -908,8 +907,9 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
           </div>
         </form>
 
-        <div className="cursor-default mt-8 text-center lg:hidden">
-          <p className="text-lg font-bold">by Jeacodes</p>
+          {/* Mobile footer */}
+        <div className=" bottom-0  cursor-default mt-8 text-center ">
+<Footer/>
         </div>
       </div>
     </div>

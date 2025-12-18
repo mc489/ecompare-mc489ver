@@ -707,7 +707,7 @@
   border-radius: 16px;
   background: rgba(0, 0, 0, 0.70);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px) !important;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4),
     inset 0px -2px 4px rgba(255, 255, 255, 0.2);
   /* inner shadow */
@@ -743,7 +743,7 @@
   text-align: center;
   position: relative;
   border-radius: 16px;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px) ;
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4),
     inset 0px -2px 4px rgba(255, 255, 255, 0.2);

@@ -315,16 +315,18 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
 
                {Bigtablet &&
     <>
-    <div className="flex flex-col lg:flex-row items-stretch justify-center !h-[100vh] overflow-x-hidden 
-      text-white ">
-      <div className=" !h-[100vh] w-full  px-10  py-5 flex items-center justify-between flex-col  top-0">
+  <div className="flex flex-col l items-stretch justify-center 
+    max-w-screen overflow-x-hidden min-h-screen lg:h-screen text-white">
+      <div className= " w-full lg:w-1/2 px-6 sm:px-10 py-5 flex items-center justify-between flex-col sticky top-0">
         <div className="w-full">
           <h1
             onClick={() => router.push("/")}
-            className=" pt-10 relative inline-block text-[24px] font-vagRounded font-bold cursor-pointer group text-white"
+            className=" pt-10 relative inline-block text-[24px]
+             font-vagRounded font-bold cursor-pointer group text-white"
           >
             Go to home
-            <span className="absolute left-1/2 bottom-0 h-[2px] w-0 bg-white transition-all duration-300 group-hover:w-full group-hover:left-0"></span>
+            <span className="absolute left-1/2 bottom-0 h-[2px] w-0 bg-white 
+            transition-all duration-300 group-hover:w-full group-hover:left-0"></span>
           </h1>
         </div>
         <div className="cursor-default text-center lg:text-left">
@@ -351,7 +353,7 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
 
       {/* right side */}
 
-         <div className="w-full px-6 py-10 lg:w-1/2 sm:px-10 lg:overflow-y-auto scrollbar !bg-black/20
+         <div className="w-full px-6 py-10 !h-[100vh]  lg:overflow-y-auto scrollbar !bg-black/20
       big-tablet border-l border-gray-500">
         <form onSubmit={handleSubmit}>
           {/* Email or Username */}
@@ -508,13 +510,11 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
             </div>
           </div>
         </form>
-
-        {/* Mobile footer */}
-        <div className="cursor-default mt-8 text-center lg:hidden">
-          <p className="text-lg font-bold">by Jeacodes</p>
+             <div className=" bottom-0  cursor-default mt-8 text-center ">
+<Footer/>
         </div>
-      </div>
-    </div>
+ </div>
+     </div>
     </>
 
 
@@ -523,7 +523,7 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
     <>
     <div className="flex flex-col l items-stretch justify-center 
     max-w-screen overflow-x-hidden min-h-screen lg:h-screen text-white">
-      <div className= " w-full lg:w-1/2 px-6 sm:px-10 py-5 flex items-center justify-between flex-col sticky top-0">
+      <div className= " w-full h-full px-6 sm:px-10 py-5 flex items-center justify-between flex-col sticky top-0">
         <div className=" mb-15 w-full">
           <h1
             onClick={() => router.push("/")}
