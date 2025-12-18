@@ -16,10 +16,16 @@ export async function GET(req) {
     });
   }
 
-  // Detect user agent to determine device type
+  // 1. Detect device
   const userAgent = req.headers.get("user-agent") || "";
   const isMobile = /mobile/i.test(userAgent);
   const deviceType = isMobile ? "mobile" : "desktop";
+
+  // 2. Build the correct target URL based on device
+  // Desktop uses /catalog/ while Mobile often uses /search/ or different query params
+  const targetUrl = isMobile 
+    ? `https://www.lazada.com.ph/search/?ajax=true&q=${encodeURIComponent(keyword)}`
+    : `https://www.lazada.com.ph/catalog/?ajax=true&q=${encodeURIComponent(keyword)}`;
 
   // Store search query
   if (userId) {
@@ -28,23 +34,28 @@ export async function GET(req) {
     } catch {}
   }
 
-  const url = `https://www.lazada.com.ph/catalog/?ajax=true&q=${encodeURIComponent(
-    keyword
-  )}`;
-
   try {
-    // Dynamically set the device parameter based on the user's device
+    // 3. Request via ScraperAPI with matching device profiles
     const scraperUrl = `https://api.scraperapi.com?api_key=${API_KEY}&url=${encodeURIComponent(
-      url
+      targetUrl
     )}&country=ph&device=${deviceType}&keep_headers=true`;
 
     const response = await fetch(scraperUrl);
-    const json = await response.json().catch(() => null);
+    
+    // Some mobile responses come back with different content-types
+    const text = await response.text();
+    let json = null;
+    try {
+      json = JSON.parse(text);
+    } catch (e) {
+      json = null;
+    }
 
     return NextResponse.json({
       success: true,
       keyword,
-      lazada: json || { error: "Lazada search failed" },
+      deviceUsed: deviceType, // Diagnostic to see what was detected
+      lazada: json || { error: "Lazada search failed", raw: text.substring(0, 200) },
       shopee: {
         available: false,
         message: "Your Shopee scraper is separate via puppeteer.",

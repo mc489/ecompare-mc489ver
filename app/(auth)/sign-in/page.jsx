@@ -125,7 +125,7 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
           <h1 className="text-3xl font-bold font-vagRounded sm:text-4xl lg:text-5xl text-white">
             Welcome to
           </h1>
-          <p className="font-baloo text-5xl  sm:text-6xl lg:text-8xl">
+          <p className="font-baloo text-5xl  sm:text-6xl lg:text-8xl whitespace-nowrap">
             E-Compare
           </p>
           <div className="">
