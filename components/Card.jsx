@@ -274,7 +274,7 @@ function Card({
       {/* Price and Button */}
       <div className="flex justify-between items-center ml-">
         <div className="flex flex-col items-start">
-          <p className="text-white text-[12px] font-medium">₱ {products.price}</p>
+          <p className="text-white text-[12px] font-medium whitespace-nowrap">₱ {products.price}</p>
         
           <div className="flex items-center gap-1">
               <FaStar className="text-[8px] text-gray-200" />{" "}

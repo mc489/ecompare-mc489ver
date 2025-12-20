@@ -315,8 +315,10 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
 
                {Bigtablet &&
     <>
-  <div className="flex flex-col l items-stretch justify-center 
-    max-w-screen overflow-x-hidden min-h-screen lg:h-screen text-white">
+<div className="flex flex-col items-stretch justify-center max-w-full h-screen 
+overflow-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:display-none text-white">
+  {/* Content */}
+
       <div className= " w-full lg:w-1/2 px-6 sm:px-10 py-5 flex items-center justify-between flex-col sticky top-0">
         <div className="w-full">
           <h1
@@ -329,7 +331,7 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
             transition-all duration-300 group-hover:w-full group-hover:left-0"></span>
           </h1>
         </div>
-        <div className="cursor-default text-center lg:text-left">
+        <div className="mt-10 cursor-default text-center lg:text-left">
           <h1 className="text-3xl font-bold font-vagRounded sm:text-4xl lg:text-5xl text-white">
             Welcome to
           </h1>
@@ -353,7 +355,7 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
 
       {/* right side */}
 
-         <div className="w-full px-6 py-10 !h-[100vh]  lg:overflow-y-auto scrollbar !bg-black/20
+         <div className="w-full px-10 py-10 !h-[100vh]  lg:overflow-y-auto scrollbar !bg-black/20
       big-tablet border-l border-gray-500">
         <form onSubmit={handleSubmit}>
           {/* Email or Username */}
@@ -459,7 +461,8 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
                 type="button"
                 onClick={() => handleOAuthSignIn("google")}
                 disabled={!isLoaded}
-                className="search-button cursor-pointer flex flex-row items-center text-white justify-center w-full gap-2 px-6 text-base
+                className="search-button cursor-pointer flex flex-row items-center text-white justify-center w-full gap-2 px-6
+                 text-base
                !w-full !rounded-[23px] !min-h-[64px] sm:w-auto sm:text-xl sm:px-12 font-vagRounded "
               >
                 <FcGoogle className="text-2xl sm:text-4xl" />
@@ -474,7 +477,8 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
                 type="button"
                 onClick={() => handleOAuthSignIn("facebook")}
                 disabled={!isLoaded}
-              className="search-button cursor-pointer flex flex-row items-center text-white justify-center w-full gap-2 px-6 text-base
+              className="search-button cursor-pointer flex flex-row items-center
+               text-white justify-center w-full gap-2 px-6 text-base
                !w-full !rounded-[23px] !min-h-[64px] sm:w-auto sm:text-xl sm:px-12 font-vagRounded"
               >
                 <div className="p-2 sm:p-1 rounded-md">
@@ -510,9 +514,9 @@ const Bigtablet = useMediaQuery({ minWidth: 700, maxWidth: 1000 });
             </div>
           </div>
         </form>
-             <div className=" bottom-0  cursor-default mt-8 text-center ">
+           
 <Footer/>
-        </div>
+      
  </div>
      </div>
     </>

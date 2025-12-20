@@ -12,9 +12,9 @@ import { TrendingUpDown } from "lucide-react";
 import CompareSkeleton from "./CompareSkeleton";
 import Link from "next/link";
 
-  
-
 import { useMediaQuery } from 'react-responsive';
+
+
 function SearchResults({
   query,
   onToggleHeader,
@@ -1128,7 +1128,7 @@ function SearchResults({
                 setShowComparisonTable(false);
                 setShowCompare(true);
               }}
-              className="text-white text-[26px] font-vagRounded font-light cursor-pointer"
+              className="text-white text-[20px] font-vagRounded font-light cursor-pointer"
               title="Minimize"
             >
               ━
@@ -1145,13 +1145,13 @@ function SearchResults({
                 setSelectedVariations({});
                 minimizedSnapshot.current = [];
               }}
-              className="text-white text-[36px] font-vagRounded font-light cursor-pointer"
+              className="text-white text-[20px] font-vagRounded font-light cursor-pointer"
               title="Close"
             >
               ✕
             </button>
           </motion.div>
-          <h2 className="text-2xl font-bold mb-8 text-center z-10 mt-16">
+          <h2 className="!text-[24px] font-bold mb-8 text-center z-10 mt-16">
             Product Comparison
           </h2>
           {loadingCompare ? (
@@ -1289,8 +1289,8 @@ function SearchResults({
             </div>
           ) : (
             <>
-              <div className="overflow-x-hidden overflow-hidden relative z-10">
-                <div className="w-3/4 mx-auto flex gap-4">
+              <div className="p-8 overflow-x-hidden overflow-hidden relative z-10">
+                <div className="w-full mx-auto flex gap-4">
                   {comparisonResults.map((result, index) => {
                     const p = products.find(
                       (x) => x.id === selectedProducts[index]
@@ -1300,9 +1300,11 @@ function SearchResults({
                       return (
                         <div
                           key={p?.id || index}
-                          className="flex flex-col flex-1 min-w-[220px] pb-5"
+                          className="flex flex-col m-h-[150px] !w-[120px] pb-5"
                         >
-                          <div className="glass-button1 rounded-[23px] h-full min-h-[600px] flex flex-col items-center justify-center p-6 text-center gap-4 border border-red-500/30">
+                          <div className="glass-button1 rounded-[23px] 
+                          h-full min-h-[600px] flex flex-col items-center 
+                          justify-center p-6 text-center gap-4 border border-red-500/30">
                             {p?.image && (
                               <img
                                 src={p.image}
@@ -1311,17 +1313,17 @@ function SearchResults({
                               />
                             )}
                             <div>
-                              <p className="font-bold text-red-300 text-lg">
+                              <p className="font-bold text-red-300 text-[12px]">
                                 Data Unavailable
                               </p>
-                              <p className="text-sm text-white/60 mt-1">
+                              <p className="text-[8px] text-white/60 mt-1">
                                 We couldn't fetch the latest details for this
                                 item.
                               </p>
                             </div>
                             <button
                               onClick={() => window.open(p?.link, "_blank")}
-                              className="bg-white/10 hover:bg-white/20 text-white text-sm px-4 py-2 rounded-full transition-colors"
+                              className="bg-white/10 hover:bg-white/20 text-white text-[10px] px-4 py-2 rounded-[16px] transition-colors"
                             >
                               View on Store
                             </button>
@@ -1364,22 +1366,30 @@ function SearchResults({
                     return (
                       <div
                         key={p?.id || index}
-                        className="flex flex-col flex-1 min-w-[220px] pb-5"
+                        className="flex flex-col flex-1  pb-5"
                       >
+
+                        <div className="!w-[150px]">
                         <Link href={p?.link} target="_blank">
-                          <div className="glass-button1 rounded-t-[23px] min-h-[250px]">
-                            <div className="flex justify-center items-center flex-col p-4">
+                        
+
+
+                     
+                          <div className="glass-button1 rounded-t-[23px] !w-[150px]
+                           ">
+                            <div className="flex justify-center items-center flex-col p-2">
                               <img
                                 crossOrigin="anonymous"
                                 src={p?.image}
                                 alt={result.title}
-                                className="w-32 h-32 object-contain rounded-lg"
+                                className="w-22 h-22 object-contain rounded-lg"
                               />
-                              <p className="font-semibold line-clamp-2 text-ellipsis overflow-hidden text-center mt-3">
+                              <p className="font-semibold line-clamp-2
+                               text-ellipsis !text-[10px] overflow-hidden text-center mt-3">
                                 {result.title}
                               </p>
                               {result.brand && (
-                                <p className="text-xs text-white/60 mt-1">
+                                <p className="text-[8px] text-white/60 mt-1">
                                   {result.brand}
                                 </p>
                               )}
@@ -1387,46 +1397,48 @@ function SearchResults({
                           </div>
                         </Link>
 
-                        <div className="glass-button1 h-16 rounded-0 flex items-center justify-center text-center">
+                        <div className="glass-button1 h-16 
+                        !w-[150px]
+                        rounded-0 flex items-center justify-center text-center">
                           <div className="flex flex-col">
-                            <span className="font-semibold text-xs opacity-60 ">
+                            <span className="font-semibold text-[10px] opacity-60 ">
                               Price
                             </span>
-                            <span>₱{displayPrice}</span>
+                            <span className="text-[12px]">₱{displayPrice}</span>
                           </div>
                         </div>
 
                         <div className="glass-button1 h-16 rounded-0 flex items-center justify-center text-center">
                           <div className="flex flex-col">
-                            <span className="font-semibold text-xs opacity-60">
+                            <span className="font-semibold text-[10px] opacity-60">
                               Rating
                             </span>
-                            <span>{result.rating || "-"} ⭐</span>
+                              <span className="text-[12px]">{result.rating || "-"} ⭐</span>
                           </div>
                         </div>
 
                         <div className="glass-button1 h-16 rounded-0 flex items-center justify-center text-center">
                           <div className="flex flex-col">
-                            <span className="font-semibold text-xs opacity-60">
+                            <span className="font-semibold text-[10px] opacity-60">
                               Store
                             </span>
-                            <span>{p?.source || "-"}</span>
+                              <span className="text-[12px]">{p?.source || "-"}</span>
                           </div>
                         </div>
 
                         <div className="glass-button1 min-h-24 rounded-0 flex items-center justify-center text-center p-3">
                           <div className="flex flex-col">
-                            <span className="font-semibold text-xs opacity-60">
+                            <span className="font-semibold text-[10px] opacity-60">
                               Description
                             </span>
-                            <span className="text-xs mt-1 line-clamp-3 text-ellipsis overflow-hidden">
+                            <span className="text-[10px] mt-1 line-clamp-3 text-ellipsis overflow-hidden">
                               {result.description || "-"}
                             </span>
                           </div>
                         </div>
 
                         <div className="glass-button1 py-3 min-h-16 h-auto rounded-0 flex flex-col items-center justify-center text-center relative">
-                          <span className="font-semibold text-xs opacity-60 mb-2">
+                          <span className="font-semibold text-[10px] opacity-60 mb-2">
                             Variations
                           </span>
                           <Dropdown
@@ -1451,7 +1463,7 @@ function SearchResults({
                                 : "Select variation "
                             }
                             placeholder="Select a variation"
-                            className="w-full text-sm font-vagRounded"
+                            className="w-full text-[12px] font-vagRounded"
                             controlClassName="Dropdown-control !w-full"
                             menuClassName="Dropdown-menu !absolute !static !w-full rounded-none "
                             arrowClassName="text-white"
@@ -1469,7 +1481,7 @@ function SearchResults({
                             Buy Now
                           </button>
                         </div>
-                      </div>
+                      </div></div>
                     );
                   })}
                 </div>
@@ -1498,7 +1510,8 @@ function SearchResults({
         {!showCompare && !isMinimized && !showComparisonTable && (
           <button
             onClick={() => setShowCompare(true)}
-            className="compare-button transition-all text-center text-[16px] text-white rounded-full font-bold w-[150px] h-[40px]"
+            className="compare-button transition-all text-center text-[14px] text-white 
+            !rounded-[12px] font-bold w-[150px] h-[40px]"
           >
             Compare
           </button>
@@ -1518,8 +1531,8 @@ function SearchResults({
                 await CompareAction();
                 setShowComparisonTable(true);
               }}
-              className={`text-center text-[16px]
-                rounded-full font-bold  w-[150px] h-[40px] compare-button ${
+              className={`text-center text-[14px]
+                !rounded-[12px] font-bold  w-[150px] h-[40px] compare-button ${
                 selectedProducts.length >= 2 && selectedProducts.length <= 3
                   ? "text-white bg-blue-500 hover:bg-black-200"
                   : "text-gray-300 bg-gray-300 cursor-not-allowed pointer-events-none"
