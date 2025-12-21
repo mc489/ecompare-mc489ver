@@ -200,7 +200,7 @@ function Card({
     <>
     <div
       className={cn(
-       "flex flex-col w-full glass-button  rounded-2xl p-4 gap-3 relative cursor-pointer transition-all duration-150 ",
+ "flex flex-col w-full glass-button  rounded-2xl p-4 gap-3 relative cursor-pointer transition-all duration-150 ",      
     showCompare && "z-30",
         isDisabled && "opacity-50",
         isPressed && "scale-95"

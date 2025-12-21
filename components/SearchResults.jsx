@@ -1059,7 +1059,7 @@ function SearchResults({
             )}
           </AnimatePresence>
 
-          <div className="text-center px-8 pt-15 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="text-center px-8 py-15 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
             {loading ? (
               // <div className="col-span-full flex flex-col justify-center items-center gap-4 min-h-[60vh]">
               //   <motion.div

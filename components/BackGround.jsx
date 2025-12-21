@@ -1,46 +1,53 @@
 "use client";
-
-import { useMediaQuery } from 'react-responsive';
 import React, { useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
+import { useMediaQuery } from "react-responsive";
 import * as THREE from "three";
 
 function TextureMesh() {
-  // 1. Detect Mobile for Shader Complexity
-  const isTabletOrMobile = useMediaQuery({ query: '(max-width: 699px)' });
-
   const mesh = useRef();
 
-  // 2. Adjust 'u_detail' based on device
-  // Desktop gets 0.4 (High quality), Mobile gets 0.15 (Performance mode)
-  const detailValue = isTabletOrMobile ? 0.15 : 0.4;
+  // Your Media Queries
+  const isDesktop = useMediaQuery({ query: '(min-width: 1000px)' });
+  const isTablet = useMediaQuery({ query: '(min-width: 700px) and (max-width: 999px)' });
+  const isMobile = useMediaQuery({ query: '(max-width: 699px)' });
 
   const uniforms = useMemo(
     () => ({
       u_color: { value: new THREE.Vector3(0.3, 0, 1) },
       u_background: { value: new THREE.Vector4(0, 0, 0, 1) },
       u_speed: { value: 0.1 },
-      u_detail: { value: detailValue }, // Optimized value here
+      u_detail: { value: 0.4 },
       u_time: { value: 0 },
       u_mouse: { value: new THREE.Vector2(0, 0) },
       u_resolution: { value: new THREE.Vector2(1024, 1024) },
+      // Added a shift variable to move the center for mobile
+      u_mobileShift: { value: 0.0 } 
     }),
-    [detailValue] // Re-memoize if device type changes
+    []
   );
 
   useFrame((state) => {
-    const { clock, mouse, gl } = state;
+    const { clock, mouse, size } = state;
     if (mesh.current) {
       uniforms.u_mouse.value.set(mouse.x / 2 + 0.5, mouse.y / 2 + 0.5);
       uniforms.u_time.value = clock.getElapsedTime();
-      const rect = gl.domElement.getBoundingClientRect();
-      uniforms.u_resolution.value.set(rect.width, rect.height);
+      uniforms.u_resolution.value.set(size.width, size.height);
+
+      // Adjust shift based on device
+      if (isMobile) {
+        uniforms.u_mobileShift.value = 0.65; // Moves the "blob" up from the bottom
+      } else if (isTablet) {
+        uniforms.u_mobileShift.value = 0.25;
+      } else {
+        uniforms.u_mobileShift.value = 0.0; // Desktop remains original
+      }
     }
   });
 
   return (
     <mesh ref={mesh}>
-      <planeGeometry args={[1024, 1024, 1, 1]} />
+      <planeGeometry args={[100, 100, 1, 1]} />
       <shaderMaterial
         fragmentShader={fragmentShader}
         vertexShader={vertexShader}
@@ -65,6 +72,7 @@ const fragmentShader = `
   uniform vec4 u_background;
   uniform float u_speed;
   uniform float u_detail;
+  uniform float u_mobileShift; // New uniform
 
   mat2 m(float a) {
     float c=cos(a), s=sin(a);
@@ -81,12 +89,14 @@ const fragmentShader = `
   }
 
   void main() {
-    vec2 a = gl_FragCoord.xy / u_resolution.x - vec2(0.5, 0.5);
+    // We keep your original math: gl_FragCoord.xy / u_resolution.x
+    // But we add 'u_mobileShift' to the Y coordinate specifically for mobile
+    vec2 a = gl_FragCoord.xy / u_resolution.x - vec2(0.5, 0.5 + u_mobileShift);
+    
     vec3 cl = vec3(0.0);
     float d = 2.5;
     
-    // This loop is the heavy part. u_detail controls how many times it runs.
-    float maxSteps = 1.0 + 20.0 * u_detail;
+    float maxSteps = 1.0 + 16.0 * u_detail;
 
     for (float i = 0.; i < 21.; i++) {
       if (i >= maxSteps) break;
@@ -110,9 +120,6 @@ const fragmentShader = `
 `;
 
 export default function ShaderBackground() {
-  // 3. Detect Mobile for Canvas Resolution
-  const isTabletOrMobile = useMediaQuery({ query: '(max-width: 699px)' });
-
   return (
     <Canvas
       style={{
@@ -122,22 +129,20 @@ export default function ShaderBackground() {
         width: "100vw",
         height: "100vh",
         zIndex: -1,
+        pointerEvents: "none",
       }}
-      // 4. Optimization: Strict cap on Pixel Ratio for mobile
-      // Mobile = [1, 1] (prevents overheating)
-      // Desktop = [1, 1.5] (looks crisp)
-      dpr={isTabletOrMobile ? [1, 1] : [1, 1.5]}
+      dpr={[1, 1]} 
       gl={{
-        preserveDrawingBuffer: true,
+        preserveDrawingBuffer: false,
         premultipliedAlpha: false,
         alpha: true,
-        antialias: false, // Antialias is expensive, keeping it false is good
+        antialias: false,
         precision: "mediump",
-        powerPreference: "high-performance",
+        powerPreference: "default",
       }}
       camera={{ fov: 75, near: 0.1, far: 1000, position: [0, 0, 5] }}
     >
       <TextureMesh />
     </Canvas>
   );
-}
+} 
