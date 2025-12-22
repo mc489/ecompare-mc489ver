@@ -186,6 +186,8 @@ function Header({ visible = false }) {
         >
           {/* TEXT - Added whitespace-nowrap */}
           <span
+          onCopy={(e) => e.preventDefault()} 
+  onContextMenu={(e) => e.preventDefault()}
             className={`absolute left-0 top-0 transition-opacity duration-300 whitespace-nowrap ${
               showIcon ? "opacity-0" : "opacity-100"
             }`}
@@ -204,6 +206,7 @@ function Header({ visible = false }) {
 
           {/* Invisible spacer - This is the MOST important one to fix */}
           {/* Added whitespace-nowrap here so the container doesn't shrink */}
+          
           <span className="opacity-0 whitespace-nowrap">E-COMPARE</span>
         </Link>
       </div>
