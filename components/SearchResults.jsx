@@ -1510,15 +1510,15 @@ function SearchResults({
         {!showCompare && !isMinimized && !showComparisonTable && (
           <button
             onClick={() => setShowCompare(true)}
-            className="compare-button transition-all text-center text-[14px] text-white 
-            !rounded-[12px] font-bold w-[150px] h-[40px]"
+            className="compare-button transition-all text-center text-[16px] text-white 
+            !rounded-[16px] font-bold w-[164px] h-[48px]"
           >
             Compare
           </button>
         )}
         {showCompare && !showComparisonTable && !isAddingOneMore && (
           <div className="flex flex-col items-center gap-3">
-            <div className="text-white text-[12px] font-semibold bg-black/60
+            <div className="text-white text-[14px] backdrop-blur-md font-semibold bg-black/60
              px-4 py-2 rounded-full shadow-md flex justify-center items-center">
               {selectedProducts.length}/3
             </div>
@@ -1531,8 +1531,8 @@ function SearchResults({
                 await CompareAction();
                 setShowComparisonTable(true);
               }}
-              className={`text-center text-[14px]
-                !rounded-[12px] font-bold  w-[150px] h-[40px] compare-button ${
+              className={`text-center text-[16px]
+                !rounded-[16px] font-bold w-[164px] h-[48px] compare-button ${
                 selectedProducts.length >= 2 && selectedProducts.length <= 3
                   ? "text-white bg-blue-500 hover:bg-black-200"
                   : "text-gray-300 bg-gray-300 cursor-not-allowed pointer-events-none"

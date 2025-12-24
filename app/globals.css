@@ -588,22 +588,22 @@
 }
 
 .Dropdown-menu {
-
-  justify-self: end !important;
+  position: absolute !important;
+  right: 0 !important;   /* Pins it to the right edge so it doesn't overflow the screen */
+  top: 100% !important; /* Forces it to stay below the 'Sort by' text */
   width: 200px !important;
-  position: relative;
+  
+  /* Your current style */
   text-align: center;
   background: rgba(255, 255, 255, 0.02) !important;
-  border-radius: 16px;
-  border: 0.5px !important;
+  border-radius: 16px;border: 0.5px !important;
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px);
-
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4),
+  z-index: 1000;
+  overflow: visible !important; 
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4),
     /* drop shadow */
     inset 0px -2px 4px rgba(255, 255, 255, 0.2)!important;
-  /* inner shadow */
-  overflow: hidden;
 }
 
 .Dropdown-menu::before {

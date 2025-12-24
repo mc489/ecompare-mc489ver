@@ -126,14 +126,14 @@ const [query, setQuery] = useState("");
               </div>
             </div>
 
-            <div className="pt-10 flex justify-end items-center font-vagRounded py-1 !text-[12px] text-white font-bold flex ">
+            <div className="relative z-50 pt-10 flex justify-end items-center font-vagRounded py-1 !text-[12px] text-white font-bold">
               <p>Sort by:</p>
           
             <Dropdown
               options={options}
               onChange={handleSelect}
               value={selectedOption}
-              className="!text-[12px] font-vagRounded whitespace-nowrap"
+              className="!text-[12px]  font-vagRounded whitespace-nowrap"
               controlClassName="Dropdown-control"
               menuClassName="Dropdown-menu"
               arrowClassName="text-white"

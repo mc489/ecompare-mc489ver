@@ -200,19 +200,30 @@ function HomePage() {
               <div className={`flex justify-center items-center flex-row font-vagRounded text-white font-medium transition-opacity 
                 ${isFocused ? "opacity-0" : "opacity-100"}`} style={{ width: "40%" }}>
                 <div className="flex !items-center gap-1 !mb-0">
-                  <Popover.Root>
-                    <Popover.Trigger asChild>
-                      <IoMdInformationCircleOutline className="items-center cursor-pointer" size={10} color="white" />
-                    </Popover.Trigger>
-                    <Popover.Portal>
-                      <Popover.Content className="z-50 !rounded-[16px] !border-none glass-button max-w-[120px] p-3 text-white shadow-md !outline-none">
-                        <div className="items-center flex flex-row font-bold border-b border-white mb-2 pb-1">
-                          <FaExclamation size={10} /><span className="text-[10px]">Notice</span>
-                        </div>
-                        <p className="text-[8px]"><span className="text-orange-500 ">Shopee</span> products not available.</p>
-                      </Popover.Content>
-                    </Popover.Portal>
-                  </Popover.Root>
+                <Popover.Root>
+  <Popover.Trigger asChild>
+    <IoMdInformationCircleOutline className="items-center cursor-pointer mb-[1.5px]" size={12} color="white" />
+  </Popover.Trigger>
+  
+  <Popover.Portal>
+    {/* Added sideOffset to give the arrow some breathing room */}
+    <Popover.Content 
+      sideOffset={5} 
+      className="z-50  !rounded-[16px] !border-none glass-button max-w-[120px] p-3 text-white shadow-md !outline-none"
+    >
+      <div className="items-center flex flex-row font-bold border-b border-white mb-2 pb-1">
+        <FaExclamation size={10} />
+        <span className="text-[10px]">Notice</span>
+      </div>
+      <p className="text-[8px]">
+        <span className="text-orange-500">Shopee</span> are products not available.
+      </p>
+
+      {/* --- The Arrowhead --- */}
+      <Popover.Arrow className="fill-white/50" width={10} height={5} />
+    </Popover.Content>
+  </Popover.Portal>
+</Popover.Root>
                   <p className=" cursor-default mr-2 text-[10px]">Powered by </p>
                 </div>
                 <div className="flex gap-2">
