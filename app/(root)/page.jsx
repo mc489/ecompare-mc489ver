@@ -157,7 +157,7 @@ function HomePage() {
   <>
           <div className="!overflow-hidden h-[calc(100vh-200px)] flex flex-col">
             {/* 3. Mobile Transitioning Spacer */}
-            <div className={`transition-all duration-300 ease-in-out ${isFocused ? "h-5" : "h-1/3"}`}></div>
+            <div className={`transition-all duration-300 ease-in-out ${isFocused ? "h-2" : "h-1/3"}`}></div>
             
             <div className="flex !justify-center items-center w-full flex-col gap-5">
               <div className="flex flex-row !justify-center !items-center ">

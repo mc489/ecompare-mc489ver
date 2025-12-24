@@ -90,7 +90,7 @@ const [query, setQuery] = useState("");
           <div className="flex flex-col justify-end w-full text-white">
             <div className="flex w-full">
               {/* Search Input */}
-                 <div className="!h-[32px] glass-search relative flex-[22]">
+                 <div className="!h-[52px] glass-search relative !flex-grow">
                 <form onSubmit={handleSearch}>
 
                   <input
@@ -101,13 +101,13 @@ const [query, setQuery] = useState("");
                     placeholder="Search"
                      onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
-                    className={`!p-0 w-full  rounded-2xl text-white placeholder-white/50 !text-[12px] 
+                    className={`!p-0 w-full  rounded-2xl text-white placeholder-white/50 !text-[14px] 
               font-normal transition-all duration-300  
-               ${isFocused ? "!pl-8" : "!pl-4"}
+               ${isFocused ? "!pl-10" : "!pl-4"}
                 }`}
                   />
-                  <FaMagnifyingGlass className={`absolute left-[12px] top-1/2 
-                  -translate-y-1/2 text-white/70 text-[12px] transition-all duration-300 z-100 ${isFocused
+                  <FaMagnifyingGlass className={`absolute left-[14px] top-1/2 
+                  -translate-y-1/2 text-white/70 text-[14px] transition-all duration-300 z-100 ${isFocused
                     ? "opacity-100 translate-x-0"
                     : "opacity-0 -translate-x-3"
                     }`}
@@ -119,9 +119,9 @@ const [query, setQuery] = useState("");
               <div onClick={handleSearch}>
                 <button
                   type="button"
-                  className=" !h-[32px] search-button flex items-center justify-center rounded-r-2xl px-4"
+                  className=" !h-[52px] search-button flex items-center justify-center rounded-r-2xl px-5"
                 >
-                  <FaMagnifyingGlass className="text-white/70 !text-[8px]" />
+                  <FaMagnifyingGlass className="text-white/70 !text-[12px]" />
                 </button>
               </div>
             </div>

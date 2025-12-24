@@ -172,7 +172,7 @@ function Header({ visible = false }) {
     <header className="flex justify-between items-center
      pl-8 pr-8 py-10 h-16 font font-black bg-header-gradient text-white relative z-10 flex-nowrap">
       {/* LEFT SIDE */}
-      <div className="flex items-center font-baloo text-[12px] gap-4 ">
+      <div className="flex items-center font-baloo text-[14px] gap-4 ">
         <Link
           href="/"
           onMouseEnter={() => {
@@ -214,15 +214,15 @@ function Header({ visible = false }) {
 
 
         {/* RIGHT SIDE */}
-        <div className="flex justify-center items-center gap-5">
+        <div className="flex justify-center items-center gap-8">
           <SignedOut>
             <Link href="/sign-in">
-              <button className="font-normal text-[10px] text-white font-vagRounded cursor-pointer rounded-full  py-3 hover:text-gray-300 ease duration-500">
+              <button className="font-normal text-[14px] text-white font-vagRounded cursor-pointer rounded-full py-3 hover:text-gray-300 ease duration-500">
                 Login
               </button>
             </Link>
             <Link href="/sign-up">
-              <button className="whitespace-nowrap font-normal text-[10px] text-white 
+              <button className="whitespace-nowrap font-normal text-[14px] text-white 
               font-vagRounded cursor-pointer rounded-full py-3 hover:text-gray-300 ease duration-500">
                 Sign Up
               </button>
