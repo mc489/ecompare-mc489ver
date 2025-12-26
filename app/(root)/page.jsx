@@ -100,15 +100,16 @@ function HomePage() {
 
           {/* Below content */}
           <div
-            className="flex justify-center items-center flex-row gap-3 font-vagRounded text-white font-medium text-1xl "
+            className="flex justify-center items-center flex-row  font-vagRounded text-white font-medium text-1xl "
             style={{ width: "40%" }}
           > 
           
-          
+          <div className="flex !items-center gap-1 ">
+
           
            <Popover.Root>
               <Popover.Trigger asChild>
-                 <IoMdInformationCircleOutline className="cursor-pointer"size={16} color="white" />
+                 <IoMdInformationCircleOutline className="cursor-pointer "size={18} color="white" />
               </Popover.Trigger>
               
               <Popover.Portal>
@@ -122,17 +123,18 @@ function HomePage() {
                    Notice
                   </div>
                   <p className="text-sm">
-                    <span className="text-orange-500">Shopee</span> products is currently not available.
+                    <span className="text-orange-500">Shopee</span> products are currently not available.
                   </p>
-                  <Popover.Arrow className="fill-white" />
+                  <Popover.Arrow className="fill-white/50" />
                 </Popover.Content>
               </Popover.Portal>
             </Popover.Root>
 
 
-            <p className="cursor-default">Powered by </p>
+            <p className=" cursor-default ml-1 mr-3 ">Powered by </p>
 
-
+                <div className="flex gap-4">
+              
             <Image className="cursor-pointer items-center" src={lazada} alt="Lazada" width={24} height={24} onClick={() =>
               window.open(
                 "https://www.lazada.com.ph/"
@@ -144,8 +146,9 @@ function HomePage() {
                 "https://shopee.ph/"
 
               )
-            } />
-          </div>
+            } /> </div>
+
+          </div></div>
         </div>
       </div>
 
@@ -216,7 +219,7 @@ function HomePage() {
         <span className="text-[10px]">Notice</span>
       </div>
       <p className="text-[8px]">
-        <span className="text-orange-500">Shopee</span> are products not available.
+        <span className="text-orange-500">Shopee</span> roducts are currently not available.
       </p>
 
       {/* --- The Arrowhead --- */}

@@ -225,9 +225,9 @@ function Card({
   }}
 >
       {/* Header Section */}
-      <div className="flex justify-center items-start">
+      <div className="flex justify-center !text-left items-start">
         <div className="flex flex-col flex-1 min-w-0">
-          <p className="text-[12px] font-bold text-white truncate">
+          <p className="text-[12px]  font-bold text-white truncate">
             {products.name}
           </p>
           <p className="text-white text-[8px] text-left truncate">
@@ -274,7 +274,7 @@ function Card({
       {/* Price and Button */}
       <div className="flex justify-between items-center ml-">
         <div className="flex flex-col items-start">
-          <p className="text-white text-[12px] font-medium whitespace-nowrap">₱ {products.price}</p>
+          <p className="text-white text-[12px] font-medium whitespace-nowrap">₱ {Number(products.price).toLocaleString()}</p>
         
           <div className="flex items-center gap-1">
               <FaStar className="text-[8px] text-gray-200" />{" "}

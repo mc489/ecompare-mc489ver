@@ -525,7 +525,7 @@ overflow-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:display-none text-
               }
                {isTabletOrMobile &&
     <>
-    <div className="flex flex-col l items-stretch justify-center 
+     <div onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()} className="select-none flex flex-col l items-stretch justify-center 
     max-w-screen overflow-x-hidden min-h-screen lg:h-screen text-white">
       <div className= " w-full h-full px-6 sm:px-10 py-5 flex items-center justify-between flex-col sticky top-0">
         <div className=" mb-15 w-full">

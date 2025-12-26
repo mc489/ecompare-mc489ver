@@ -1,14 +1,18 @@
 "use client";
+
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useMediaQuery } from 'react-responsive';
-import { useSearchParams } from "next/navigation";
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect, useRef } from "react";
 import SearchResults from "@/components/SearchResults";
 import SkeletonResult from "@/components/SkeletonResult";
 import Dropdown from "react-dropdown";
-import "react-dropdown/style.css";import { FaMagnifyingGlass } from "react-icons/fa6";
+import "react-dropdown/style.css";
+import { FaMagnifyingGlass } from "react-icons/fa6";
 import dynamic from "next/dynamic";
-import { useEffect, useRef } from "react";
+
+
 function SearchResult() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const q = searchParams.get("q") || "";
  const [isFocused, setIsFocused] = useState(false); 
@@ -87,7 +91,7 @@ const [query, setQuery] = useState("");
           
 
          
-          <div className="flex flex-col justify-end w-full text-white">
+          <div className="z-35  flex flex-col justify-end w-full text-white">
             <div className="flex w-full">
               {/* Search Input */}
                  <div className="!h-[52px] glass-search relative !flex-grow">
