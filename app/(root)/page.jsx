@@ -66,18 +66,23 @@ function HomePage() {
             <div className="w-full flex max-w-[700px]  relative">
               {/* Fading Placeholder */}
               {!search && (
+                
                 <div
                   className={`absolute left-12 top-1/2 transform -translate-y-1/2 
                     text-white/50 pointer-events-none z-10 transition-opacity duration-500 ${fadeState === "fade-in" ? "opacity-100" : "opacity-0"
                     }`}
                   style={{ whiteSpace: "nowrap" }}
                   dangerouslySetInnerHTML={{ __html: fadeText }}
+                  
                 />
+              
+              
               )}
 
               <div className="glass-search relative flex-[22]">
                 <form onSubmit={handleSubmit}>
                   <FaMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 text-[16px] pointer-events-none" />
+                  
                   <input
                     className="w-full rounded-l-2xl text-white placeholder-white/50 text-[16px] font-normal"
                     type="text" 
@@ -94,6 +99,8 @@ function HomePage() {
                 >
                   <FaMagnifyingGlass className=" text-white/70 text-lg" />
                 </button>
+                
+                
               </div>
             </div>
           </div>
@@ -151,8 +158,9 @@ function HomePage() {
           </div></div>
         </div>
       </div>
-
+    
       <Footer />
+     
       </>
       }
       
@@ -160,7 +168,7 @@ function HomePage() {
   <>
           <div className="!overflow-hidden h-[calc(100vh-200px)] flex flex-col">
             {/* 3. Mobile Transitioning Spacer */}
-            <div className={`transition-all duration-300 ease-in-out ${isFocused ? "h-2" : "h-1/3"}`}></div>
+            <div className={`transition-all duration-200 ease-in-out ${isFocused ? "h-2" : "h-1/3"}`}></div>
             
             <div className="flex !justify-center items-center w-full flex-col gap-5">
               <div className="flex flex-row !justify-center !items-center ">

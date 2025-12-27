@@ -458,34 +458,41 @@ function SearchResults({
     <>
   {isDesktopOrLaptop &&
   <>
-      {!showComparisonTable && (
+    {!showComparisonTable && (
+      <div className="relative min-h-screen">
+        {/* 1. BACKGROUND BLUR OVERLAY */}
         <motion.div
-          key="motion-container"
           initial={false}
-          animate={
-            
-            showCompare
-              ? { y: 0, backdropFilter: "blur(35px)" }
-              : { y: 0, backdropFilter: "blur(0px)" }
-          }
-          transition={{ type: "spring", stiffness: 200, damping: 25 }}
-          className={`relative z-30 min-h-screen ${
+          animate={{
+            opacity: showCompare ? 1 : 0,
+            backdropFilter: showCompare ? "blur(35px)" : "blur(0px)",
+            WebkitBackdropFilter: showCompare ? "blur(35px)" : "blur(0px)",
+          }}
+          transition={{ duration: 0.4 }}
+          className="fixed inset-0 z-20 pointer-events-none"
+          style={{
+            backgroundColor: showCompare ? "rgba(0,0,0,0.05)" : "transparent",
+          }}
+        />
+
+        {/* 2. MAIN CONTENT CONTAINER */}
+        <div
+          className={`relative z-30 min-h-screen transition-all duration-300 ${
             showCompare ? "inner-shadow-y" : "bg-transparent"
           }`}
-          style={{ top: "5px", overflow: "visible" }}
+          style={{ top: "5px" }}
         >
-          {/* ✕ and ━ Buttons */}
+          {/* ✕ Button logic */}
           <AnimatePresence>
             {showCompare && showClose && (
               <motion.div
                 key="top-buttons"
-                className="absolute top-4 right-10 flex gap-4 z-[101]"
+                className="absolute top-4 right-8 flex gap-4 z-[101]"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: -5 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
               >
-                
                 <button
                   onClick={() => {
                     setShowCompare(false);
@@ -493,8 +500,7 @@ function SearchResults({
                     setIsMinimized(false);
                     minimizedSnapshot.current = [];
                   }}
-                  className="text-white text-[32px] font-vagRounded font-light cursor-pointer"
-                  title="Close"
+                  className="text-white text-[20px] font-vagRounded font-light cursor-pointer"
                 >
                   ✕
                 </button>
@@ -502,18 +508,9 @@ function SearchResults({
             )}
           </AnimatePresence>
 
-          <div className="text-center px-10 pt-20 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+          {/* Product Grid */}
+          <div className="text-center px-8 py-15 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
             {loading ? (
-              // <div className="col-span-full flex flex-col justify-center items-center gap-4 min-h-[60vh]">
-              //   <motion.div
-              //     animate={{ rotate: 360 }}
-              //     transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-              //     className="w-12 h-12 border-4 border-t-white border-gray-400 rounded-full"
-              //   />
-              //   <p className="text-white text-lg font-vagRounded tracking-wide">
-              //     Loading Products...
-              //   </p>
-              // </div>
               <SkeletonResult />
             ) : error ? (
               <p className="text-center text-red-400 font-vagRounded mt-10">
@@ -543,8 +540,10 @@ function SearchResults({
               ))
             )}
           </div>
-        </motion.div>
-      )}
+        </div>
+      </div>
+    )}
+  
 
       {showComparisonTable && (
         <motion.div

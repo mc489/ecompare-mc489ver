@@ -13,12 +13,15 @@ import dynamic from "next/dynamic";
 import History from "./History";
 import UserLikes from "./UserLikes";
 import { useClerk } from "@clerk/nextjs";
+import { RxQuestionMarkCircled } from "react-icons/rx";
 
 function Header({ visible = false }) {
 
   const isDesktopOrLaptop = useMediaQuery({ query: '(min-width: 700px)' });
 
   const isTabletOrMobile = useMediaQuery({ query: '(max-width: 699px)' });
+
+
 
   const { openUserProfile } = useClerk();
   const pathname = usePathname();
@@ -29,6 +32,11 @@ function Header({ visible = false }) {
   const [isFocused, setIsFocused] = useState(false);
   const [showIcon, setShowIcon] = useState(false);
   const hoverTimer = useRef(null);
+
+
+   const handleTipsClick = () => {
+    router.push("/Tips"); 
+  };
   useEffect(() => {
     const q = searchParams.get("q") || "";
     setQuery(q);
@@ -45,7 +53,7 @@ function Header({ visible = false }) {
     <>
     {isDesktopOrLaptop&& 
     <>
-      <header className="flex justify-between items-center pl-13 pr-10 py-15 h-16 font font-black bg-header-gradient text-white relative z-10">
+      <header className="z-35 flex justify-between items-center px-13 py-15 h-16 font font-black bg-header-gradient text-white relative z-10">
         {/* LEFT SIDE */}
         <div className="flex items-center font-baloo text-[24px] gap-4">
           <Link
@@ -125,7 +133,12 @@ function Header({ visible = false }) {
 
         {/* RIGHT SIDE */}
         <div className="flex justify-center items-center gap-1">
+           
+                <button onClick={handleTipsClick} className="items-center mt-[3px] pl-13 cursor-pointer">
+          <RxQuestionMarkCircled color="white" size={16}/>
+          </button>
           <SignedOut>
+            
             <Link href="/sign-in">
               <button className="font-normal text-lg text-white font-vagRounded cursor-pointer rounded-full px-5 py-3 hover:text-gray-300 ease duration-500">
                 Login
@@ -214,7 +227,10 @@ function Header({ visible = false }) {
 
 
         {/* RIGHT SIDE */}
-        <div className="flex justify-center items-center gap-8">
+        <div className="flex justify-center items-center gap-2">
+           <button onClick={handleTipsClick} className="items-center mt-[1px]  cursor-pointer">
+          <RxQuestionMarkCircled color="white" size={12}/>
+          </button>
           <SignedOut>
             <Link href="/sign-in">
               <button className="font-normal text-[14px] text-white font-vagRounded cursor-pointer rounded-full py-3 hover:text-gray-300 ease duration-500">
@@ -223,7 +239,7 @@ function Header({ visible = false }) {
             </Link>
             <Link href="/sign-up">
               <button className="whitespace-nowrap font-normal text-[14px] text-white 
-              font-vagRounded cursor-pointer rounded-full py-3 hover:text-gray-300 ease duration-500">
+              font-vagRounded cursor-pointer rounded-full py-3 ml-6 hover:text-gray-300 ease duration-500">
                 Sign Up
               </button>
             </Link>

@@ -53,7 +53,7 @@ const [query, setQuery] = useState("");
 
         {/* ⬇⬇ HIDE SORT BAR ONLY WHEN isComparisonView === true */}
         {!isComparisonView && (
-          <div className="flex justify-end w-full text-white">
+          <div className="z-35 flex justify-end w-full text-white">
             <div className="font-vagRounded py-1 text-[16px] text-white font-bold">
               <p>Sort by:</p>
             </div>
