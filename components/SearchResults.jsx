@@ -377,64 +377,64 @@ function SearchResults({
 
   //------------------------------------------------------------legit---------------------------------------------------------------------------
 
-  async function CompareAction(idsToCompare = selectedProducts) {
-    try {
-      setLoadingCompare(true);
-      setShowComparisonTable(true);
+async function CompareAction(idsToCompare = selectedProducts) {
+  try {
+    setLoadingCompare(true);
+    setShowComparisonTable(true);
 
-      const selected = products.filter((p) => idsToCompare.includes(p.id));
+    // Get the actual product objects for the selected IDs
+    const selected = idsToCompare.map(id => products.find(p => p.id === id)).filter(Boolean);
 
-      if (selected.length === 0) {
-        toast.error("No products selected");
-        return;
-      }
-
-      // 1. Separate Lazada & Shopee products
-      const lazadaProducts = selected.filter((p) => p.source === "Lazada");
-      const shopeeProducts = selected.filter((p) => p.source === "Shopee"); // (Ignored for now)
-
-      // 2. Create an array of individual promises (One request per product)
-      const scrapePromises = lazadaProducts.map((product) => {
-        // Prepare a single-item array for the API
-        const singleUrlArray = JSON.stringify([
-          product.link.startsWith("//")
-            ? "https:" + product.link
-            : product.link,
-        ]);
-
-        // Fire request!
-        return axios
-          .get(`/api/lazada-true?urls=${encodeURIComponent(singleUrlArray)}`)
-          .then((res) => res.data.results?.[0]) // Grab the first (and only) result
-          .catch((err) => {
-            console.error(`Failed to scrape ${product.name}:`, err);
-            return { error: "Scrape Failed", source: "Lazada" };
-          });
-      });
-
-      // 3. Wait for all 3 Vercel servers to finish simultaneously
-      const results = await Promise.all(scrapePromises);
-
-      // Filter out any undefined/null results
-      const validResults = results.filter((item) => item);
-
-      setComparisonResults(validResults);
-
-      // Save to history (Optional: You can save them as a batch if needed)
-      if (validResults.length > 0) {
-        await axios.post("/api/history", { snapshot: validResults });
-      }
-
-      setCompareID("new-compare-session"); // Mock ID or from response
-      setShowComparisonTable(true);
-    } catch (error) {
-      console.error("CompareAction failed:", error);
-      toast.error("Something went wrong while comparing");
-    } finally {
-      setLoadingCompare(false);
+    if (selected.length === 0) {
+      toast.error("No products selected");
+      return;
     }
-  }
 
+    // Create promises for EVERY selected product
+    const scrapePromises = selected.map((product) => {
+      // HANDLE LAZADA
+      if (product.source === "Lazada") {
+        const url = product.link.startsWith("//") ? "https:" + product.link : product.link;
+        const urlParam = JSON.stringify([url]);
+
+        return axios
+          .get(`/api/lazada-true?urls=${encodeURIComponent(urlParam)}`)
+          .then((res) => {
+            // Ensure we return the data or an error object if results are empty
+            return res.data.results?.[0] || { error: "No data returned", source: "Lazada" };
+          })
+          .catch((err) => ({ error: "Scrape Failed", source: "Lazada" }));
+      }
+
+      // HANDLE SHOPEE (Placeholder for now)
+      if (product.source === "Shopee") {
+        return Promise.resolve({ 
+          error: "Shopee comparison not yet supported", 
+          source: "Shopee",
+          title: product.name // Passing name so the UI at least knows what it's failing on
+        });
+      }
+
+      return Promise.resolve({ error: "Unknown Source" });
+    });
+
+    const results = await Promise.all(scrapePromises);
+    
+    // Set results - NO filtering here, keep the length consistent with selectedProducts
+    setComparisonResults(results);
+
+    if (results.some(r => !r.error)) {
+      await axios.post("/api/history", { snapshot: results.filter(r => !r.error) });
+    }
+
+    setCompareID("new-compare-session");
+  } catch (error) {
+    console.error("CompareAction failed:", error);
+    toast.error("Something went wrong while comparing");
+  } finally {
+    setLoadingCompare(false);
+  }
+}
   useEffect(() => {
     const fetchLikes = async () => {
       try {

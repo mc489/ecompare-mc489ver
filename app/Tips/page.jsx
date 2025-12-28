@@ -71,10 +71,10 @@ const isDesktopOrLaptop = useMediaQuery({ query: '(min-width: 700px)' });
 
 {isTabletOrMobile &&
 <>
-<div  onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()}      onClick={handleTipsClick} className="select-none 
+<div  onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()}      className="select-none 
 px-10 py-8 flex flex-col gap-10  text-white whitespace  ">
 <h1
-   
+    onClick={handleTipsClick}
             className="  mt-5 relative text-[16px] font-vagRounded font-bold cursor-pointer group text-white w-fit"
           >
             Go to home
