@@ -172,7 +172,7 @@ function Card({
       {/* Price and Button */}
       <div className="flex justify-between items-center ml-2">
         <div className="flex flex-col items-start">
-          <p className="text-white text-xl font-medium">₱ {products.price}</p>
+          <p className="text-white text-xl font-medium">₱ {Number(products.price).toLocaleString()}</p>
           <div className="flex items-center">
             <p className="text-white/90 text-md">
               {products.rating}

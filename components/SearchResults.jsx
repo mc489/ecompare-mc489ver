@@ -376,61 +376,89 @@ function SearchResults({
   // }
 
   //------------------------------------------------------------legit---------------------------------------------------------------------------
+const createFallbackData = (product, statusNote) => {
+  return {
+    title: product.name || "Product Name Unavailable",
+    image: product.image || null,
+    brand: product.merchant || "Lazada Seller",
+    description: `${statusNote}. Details could not be refreshed, but you can view them directly on the store.`,
+    rating: product.rating || 0,
+    variations: [
+      {
+        name: "Standard", // ✅ Add this line
+        price: product.price ? product.price.toString() : "0",
+        stock: "Unknown"
+      }
+    ],
+    lowestPrice: product.price || 0,
+    highestPrice: product.price || 0,
+    source: product.source || "Lazada",
+    id: product.id,
+    isFallback: true 
+  };
+};
 
 async function CompareAction(idsToCompare = selectedProducts) {
   try {
     setLoadingCompare(true);
     setShowComparisonTable(true);
 
-    // Get the actual product objects for the selected IDs
-    const selected = idsToCompare.map(id => products.find(p => p.id === id)).filter(Boolean);
+    const selected = idsToCompare
+      .map(id => products.find(p => p.id === id))
+      .filter(Boolean);
 
     if (selected.length === 0) {
       toast.error("No products selected");
+      setLoadingCompare(false);
       return;
     }
 
-    // Create promises for EVERY selected product
-    const scrapePromises = selected.map((product) => {
-      // HANDLE LAZADA
+    const finalResults = [];
+
+    for (let i = 0; i < selected.length; i++) {
+      const product = selected[i];
+
+      // Delay to avoid bot detection
+      if (i > 0) await new Promise(r => setTimeout(r, 1200));
+
       if (product.source === "Lazada") {
         const url = product.link.startsWith("//") ? "https:" + product.link : product.link;
         const urlParam = JSON.stringify([url]);
 
-        return axios
-          .get(`/api/lazada-true?urls=${encodeURIComponent(urlParam)}`)
-          .then((res) => {
-            // Ensure we return the data or an error object if results are empty
-            return res.data.results?.[0] || { error: "No data returned", source: "Lazada" };
-          })
-          .catch((err) => ({ error: "Scrape Failed", source: "Lazada" }));
+        try {
+          const res = await axios.get(`/api/lazada-true?urls=${encodeURIComponent(urlParam)}`);
+          const scrapedData = res.data.results?.[0];
+
+          if (scrapedData && !scrapedData.error) {
+            finalResults.push({
+              ...scrapedData,
+              id: product.id,
+              image: scrapedData.image || product.image,
+            });
+          } else {
+            finalResults.push(createFallbackData(product, "Limited Data"));
+          }
+        } catch (err) {
+          finalResults.push(createFallbackData(product, "Scrape Failed"));
+        }
+      } else {
+        finalResults.push(createFallbackData(product, "Source not supported"));
       }
-
-      // HANDLE SHOPEE (Placeholder for now)
-      if (product.source === "Shopee") {
-        return Promise.resolve({ 
-          error: "Shopee comparison not yet supported", 
-          source: "Shopee",
-          title: product.name // Passing name so the UI at least knows what it's failing on
-        });
-      }
-
-      return Promise.resolve({ error: "Unknown Source" });
-    });
-
-    const results = await Promise.all(scrapePromises);
-    
-    // Set results - NO filtering here, keep the length consistent with selectedProducts
-    setComparisonResults(results);
-
-    if (results.some(r => !r.error)) {
-      await axios.post("/api/history", { snapshot: results.filter(r => !r.error) });
     }
 
-    setCompareID("new-compare-session");
+    // IMPORTANT: Use spread operator to ensure React triggers a re-render
+    setComparisonResults([...finalResults]);
+
+    // Save history
+    const validResults = finalResults.filter(r => !r.isFallback);
+    if (validResults.length > 0) {
+      await axios.post("/api/history", { snapshot: validResults }).catch(() => {});
+    }
+
+    setCompareID("new-compare-session-" + Date.now());
   } catch (error) {
-    console.error("CompareAction failed:", error);
-    toast.error("Something went wrong while comparing");
+    console.error("CompareAction Error:", error);
+    toast.error("An error occurred during comparison.");
   } finally {
     setLoadingCompare(false);
   }
@@ -772,36 +800,30 @@ async function CompareAction(idsToCompare = selectedProducts) {
                       );
                     }
 
-                    const variations = result?.variations || [];
-                    let minPrice = null;
-                    let maxPrice = null;
+                   const variations = result?.variations || [];
+let minPrice = null;
+let maxPrice = null;
 
-                    if (variations.length > 0) {
-                      const prices = variations
-                        .map((v) => Number(v.price))
-                        .filter((v) => !isNaN(v));
+if (variations.length > 0) {
+  // Ensure we are working with numbers
+  const prices = variations
+    .map((v) => Number(v.price))
+    .filter((v) => !isNaN(v) && v > 0);
 
-                      if (prices.length > 0) {
-                        minPrice = Math.min(...prices);
-                        maxPrice = Math.max(...prices);
-                      }
-                    }
+  if (prices.length > 0) {
+    minPrice = Math.min(...prices);
+    maxPrice = Math.max(...prices);
+  }
+}
 
-                    const selectedVar = selectedVariations[p?.id];
-                    const variationPrice =
-                      selectedVar && !isNaN(Number(selectedVar.price))
-                        ? Number(selectedVar.price)
-                        : null;
+const selectedVar = selectedVariations[p?.id];
 
-                    let displayPrice = "-";
-                    if (variationPrice !== null) {
-                      displayPrice = variationPrice;
-                    } else if (minPrice !== null && maxPrice !== null) {
-                      displayPrice =
-                        minPrice === maxPrice
-                          ? `${minPrice}`
-                          : `${minPrice} - ${maxPrice}`;
-                    }
+let displayPrice = "-";
+if (selectedVar) {
+  displayPrice = selectedVar.price;
+} else if (minPrice !== null) {
+  displayPrice = minPrice === maxPrice ? `${minPrice}` : `${minPrice} - ${maxPrice}`;
+}
 
                     return (
                       <div
@@ -834,7 +856,7 @@ async function CompareAction(idsToCompare = selectedProducts) {
                             <span className="font-semibold text-xs opacity-60 ">
                               Price
                             </span>
-                            <span>₱{displayPrice}</span>
+                            <span>₱{Number(displayPrice).toLocaleString()}</span>
                           </div>
                         </div>
 
@@ -871,27 +893,24 @@ async function CompareAction(idsToCompare = selectedProducts) {
                           <span className="font-semibold text-xs opacity-60 mb-2">
                             Variations
                           </span>
-                          <Dropdown
-                            // ✅ FIXED: Using the safe local 'variations' array
-                            options={variations.map(
-                              (variation) =>
-                                `${variation.name} — ₱${variation.price}`
-                            )}
-                            onChange={(option) => {
-                              const [name] = option.value.split(" — ₱");
-                              const selected = variations.find(
-                                (v) => v.name === name
-                              );
-                              setSelectedVariations((prev) => ({
-                                ...prev,
-                                [p.id]: selected,
-                              }));
-                            }}
-                            value={
-                              selectedVar
-                                ? `${selectedVar.name} — ₱${selectedVar.price}`
-                                : "Select variation "
-                            }
+                       <Dropdown
+  // ✅ Use the 'variations' variable defined above, not result.variations
+ options={variations.map(
+  (v) => `${v.name || "Standard"} — ₱${Number(v.price).toLocaleString()}` // ✅ Added fallback for the name
+)}   
+  onChange={(option) => {
+    const [name] = option.value.split(" — ₱");
+    const selected = variations.find((v) => v.name === name);
+    setSelectedVariations((prev) => ({
+      ...prev,
+      [p.id]: selected,
+    }));
+  }}
+  value={
+    selectedVar
+      ? `${selectedVar.name} — ₱${Number(selectedVar.price).toLocaleString()}`
+      : "Select variation"
+  }
                             placeholder="Select a variation"
                             className="w-full text-sm font-vagRounded"
                             controlClassName="Dropdown-control !w-full"
@@ -1401,7 +1420,7 @@ async function CompareAction(idsToCompare = selectedProducts) {
                             <span className="font-semibold text-[10px] opacity-60 ">
                               Price
                             </span>
-                            <span className="text-[12px]">₱{displayPrice}</span>
+                            <span className="text-[12px]">₱{Number(displayPrice).toLocaleString()}</span>
                           </div>
                         </div>
 

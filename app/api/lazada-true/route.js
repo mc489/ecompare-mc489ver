@@ -108,7 +108,32 @@ export async function GET(req) {
           html = await res.text();
           usedRender = true;
         }
+const scriptContent = $('script').filter((i, el) => {
+  return $(el).html().includes('app_pdp_data');
+}).html();
 
+let variations = [];
+
+if (scriptContent) {
+  try {
+    // Extract the JSON object from the script
+    const jsonMatch = scriptContent.match(/var\s+app_pdp_data\s*=\s*({.+?});/);
+    if (jsonMatch) {
+      const fullData = JSON.parse(jsonMatch[1]);
+      
+      // Navigate to the SKU list
+      const skus = fullData?.data?.root?.fields?.skuInfos || [];
+      
+      variations = skus.map(sku => ({
+        name: sku.propertiesValue || "Standard",
+        price: sku.price?.salePrice?.value || sku.price?.originalPrice?.value || 0,
+        stock: sku.stock || 0
+      }));
+    }
+  } catch (e) {
+    console.error("Failed to parse variations JSON", e);
+  }
+}
         const $ = cheerio.load(html);
 
         /* ----------------------------------------------------
@@ -147,11 +172,12 @@ export async function GET(req) {
           "Unknown Product";
 
         return {
-          url: productUrl,
-          title,
-          currency: "PHP",
-          lowestPrice: price || 0,
-          usedRender,
+     url: productUrl,
+  title,
+  currency: "PHP",
+  lowestPrice: price || 0,
+  variations: variations.length > 0 ? variations : [{ name: "Standard", price: price }], // Fallback
+  usedRender,
         };
       } catch (err) {
         return {
