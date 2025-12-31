@@ -1126,11 +1126,12 @@ if (selectedVar) {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="backdrop-blur-lg border border-white/20 relative w-full min-h-screen p-0 text-white flex flex-col overflow-hidden z-40"
+          className="backdrop-blur-lg border border-white/20 relative w-full min-h-screen p-0 
+          text-white flex flex-col overflow-hidden z-40"
         >
           <motion.div
             key="top-buttons"
-            className="absolute top-4 right-10 flex gap-4 z-[101]"
+            className="absolute top-4 right-8 flex gap-4 z-[101]"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: -5 }}
             exit={{ opacity: 0, y: -10 }}
@@ -1144,7 +1145,7 @@ if (selectedVar) {
                 setShowComparisonTable(false);
                 setShowCompare(true);
               }}
-              className="text-white text-[20px] font-vagRounded font-light cursor-pointer"
+              className="text-white text-[24px] font-vagRounded font-light cursor-pointer"
               title="Minimize"
             >
               ━
@@ -1161,13 +1162,13 @@ if (selectedVar) {
                 setSelectedVariations({});
                 minimizedSnapshot.current = [];
               }}
-              className="text-white text-[20px] font-vagRounded font-light cursor-pointer"
+              className="text-white text-[24px] font-vagRounded font-light cursor-pointer"
               title="Close"
             >
               ✕
             </button>
           </motion.div>
-          <h2 className="!text-[24px] font-bold mb-8 text-center z-10 mt-16">
+          <h2 className="!text-[20px] font-bold mb-8 text-center z-10 mt-16">
             Product Comparison
           </h2>
           {loadingCompare ? (
@@ -1305,8 +1306,8 @@ if (selectedVar) {
             </div>
           ) : (
             <>
-              <div className="p-8 overflow-x-hidden overflow-hidden relative z-10">
-                <div className="w-full mx-auto flex gap-4">
+             <div className="px-8 flex justify-center z-10 w-full">
+               <div className="w-full flex justify-center gap-x-4">
                   {comparisonResults.map((result, index) => {
                     const p = products.find(
                       (x) => x.id === selectedProducts[index]
@@ -1316,7 +1317,7 @@ if (selectedVar) {
                       return (
                         <div
                           key={p?.id || index}
-                          className="flex flex-col m-h-[150px] !w-[120px] pb-5"
+                          className="flex flex-col m-h-[150px] !justify-center !w-[100px] pb-5"
                         >
                           <div className="glass-button1 rounded-[23px] 
                           h-full min-h-[600px] flex flex-col items-center 
@@ -1382,16 +1383,16 @@ if (selectedVar) {
                     return (
                       <div
                         key={p?.id || index}
-                        className="flex flex-col flex-1  pb-5"
+                        className="flex flex-col !w-fit pb-5"
                       >
 
-                        <div className="!w-[150px]">
+                        <div className="!w-[110px]">
                         <Link href={p?.link} target="_blank">
                         
 
 
                      
-                          <div className="glass-button1 rounded-t-[23px] !w-[150px]
+                          <div className="!justify-center glass-button1 rounded-t-[23px] !w-[100px]
                            ">
                             <div className="flex justify-center items-center flex-col p-2">
                               <img
@@ -1401,11 +1402,11 @@ if (selectedVar) {
                                 className="w-22 h-22 object-contain rounded-lg"
                               />
                               <p className="font-semibold line-clamp-2
-                               text-ellipsis !text-[10px] overflow-hidden text-center mt-3">
+                               text-ellipsis !text-[6px] overflow-hidden text-center mt-3">
                                 {result.title}
                               </p>
                               {result.brand && (
-                                <p className="text-[8px] text-white/60 mt-1">
+                                <p className="text-[4px] text-white/60 mt-1">
                                   {result.brand}
                                 </p>
                               )}
@@ -1414,37 +1415,37 @@ if (selectedVar) {
                         </Link>
 
                         <div className="glass-button1 h-16 
-                        !w-[150px]
+                      !w-[100px]
                         rounded-0 flex items-center justify-center text-center">
                           <div className="flex flex-col">
                             <span className="font-semibold text-[10px] opacity-60 ">
                               Price
                             </span>
-                            <span className="text-[12px]">₱{Number(displayPrice).toLocaleString()}</span>
+                            <span className="text-[10px]">₱{Number(displayPrice).toLocaleString()}</span>
                           </div>
                         </div>
 
-                        <div className="glass-button1 h-16 rounded-0 flex items-center justify-center text-center">
+                        <div className="glass-button1 h-16 !w-[100px] rounded-0 flex items-center justify-center text-center">
                           <div className="flex flex-col">
                             <span className="font-semibold text-[10px] opacity-60">
                               Rating
                             </span>
-                              <span className="text-[12px]">{result.rating || "-"} ⭐</span>
+                              <span className="text-[10px]">{result.rating || "-"} ⭐</span>
                           </div>
                         </div>
 
-                        <div className="glass-button1 h-16 rounded-0 flex items-center justify-center text-center">
+                        <div className="glass-button1 h-16  !w-[100px] rounded-0 flex items-center justify-center text-center">
                           <div className="flex flex-col">
-                            <span className="font-semibold text-[10px] opacity-60">
+                            <span className="font-semibold text-[8px] opacity-60">
                               Store
                             </span>
-                              <span className="text-[12px]">{p?.source || "-"}</span>
+                              <span className="text-[10px]">{p?.source || "-"}</span>
                           </div>
                         </div>
 
-                        <div className="glass-button1 min-h-24 rounded-0 flex items-center justify-center text-center p-3">
+                        <div className="glass-button1 min-h-24 !w-  !w-[100px] rounded-0 flex items-center justify-center text-center p-3">
                           <div className="flex flex-col">
-                            <span className="font-semibold text-[10px] opacity-60">
+                            <span className="font-semibold text-[6px] opacity-60">
                               Description
                             </span>
                             <span className="text-[10px] mt-1 line-clamp-3 text-ellipsis overflow-hidden">
@@ -1453,15 +1454,16 @@ if (selectedVar) {
                           </div>
                         </div>
 
-                        <div className="glass-button1 py-3 min-h-16 h-auto rounded-0 flex flex-col items-center justify-center text-center relative">
-                          <span className="font-semibold text-[10px] opacity-60 mb-2">
+                        <div className="glass-button1  !w-[100px] py-3 min-h-16 h-auto rounded-0 
+                        flex flex-col items-center justify-center text-center relative">
+                          <span className="font-semibold !text-[1px] opacity-60 mb-2">
                             Variations
                           </span>
                           <Dropdown
                             // ✅ FIXED: Using the safe local 'variations' array
                             options={variations.map(
                               (variation) =>
-                                `${variation.name} — ₱${variation.price}`
+                                `${variation.name} — ₱${Number(variation.price).toLocaleString()}`
                             )}
                             onChange={(option) => {
                               const [name] = option.value.split(" — ₱");
@@ -1475,18 +1477,19 @@ if (selectedVar) {
                             }}
                             value={
                               selectedVar
-                                ? `${selectedVar.name} — ₱${selectedVar.price}`
+                                ? `${selectedVar.name} — ₱${Number(selectedVar.price).toLocaleString()}`
                                 : "Select variation "
                             }
                             placeholder="Select a variation"
-                            className="w-full text-[12px] font-vagRounded"
+                            className="w-full text-[10px] font-vagRounded"
                             controlClassName="Dropdown-control !w-full"
                             menuClassName="Dropdown-menu !absolute !static !w-full rounded-none "
                             arrowClassName="text-white"
                           />
                         </div>
-
-                        <div className="text-center pt-6">
+    
+                          <span className="font-semibold !text-[1px] opacity-60 mb-2"></span>
+                        <div className=" pt-6">
                           <button
                             onClick={() => window.open(p?.link, "_blank")}
                             className={`
@@ -1496,8 +1499,8 @@ if (selectedVar) {
                           >
                             Buy Now
                           </button>
-                        </div>
-                      </div></div>
+                        </div></div>
+                      </div>
                     );
                   })}
                 </div>
@@ -1511,7 +1514,7 @@ if (selectedVar) {
                     setShowComparisonTable(false);
                     setShowCompare(true);
                   }}
-                  className="absolute top-[180px] right-[40px] text-white/80 text-[15px] 
+                  className="absolute top-[180px] right-[20px] text-white/80 text-[10px] 
                      font-medium hover:text-gray-300 cursor-pointer select-none z-50"
                 >
                   + Add 1 more item
