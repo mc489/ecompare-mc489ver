@@ -1,7 +1,7 @@
 "use client";
 import Footer from "@/components/Footer";
 import { useUser } from "@clerk/nextjs";
-import { FaMagnifyingGlass, FaExclamation } from "react-icons/fa6";
+import { FaMagnifyingGlass, FaExclamation, FaClock, FaFire } from "react-icons/fa6"; // Added FaFire
 import lazada from "@/public/lazada.svg";
 import shopee from "@/public/shopee.svg";
 import Image from "next/image";
@@ -10,20 +10,114 @@ import { useState, useEffect } from "react";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { useMediaQuery } from 'react-responsive';
 import * as Popover from '@radix-ui/react-popover';
-
+import { IoClose } from "react-icons/io5"; // Added Close Icon
 function HomePage() {
   const router = useRouter();
   const { user } = useUser();
-  const [search, setSearch] = useState("");
+ 
   const [fadeText, setFadeText] = useState("");
   const [fadeState, setFadeState] = useState("fade-in");
-  // 1. New state to track if the search bar is active
   const [isFocused, setIsFocused] = useState(false);
 
+// Filter suggestions based on what the user is typing
+
+  
+
+const [search, setSearch] = useState("");
+  const [recentSearches, setRecentSearches] = useState([]);
+  const [googleSuggestions, setGoogleSuggestions] = useState([]);
+  // ... other states
+
+  // 1. Define static data first
+  const popularSearches = ["Aquaflask", "iPhone 15 Pro Max", "Bluetooth Speaker", "Mechanical Keyboard", "Sunscreen"];
+
+// 2. Filter local matches (Recent + Popular)
+const instantMatches = [...new Set([...recentSearches, ...popularSearches])]
+  .filter(term => term.toLowerCase().includes(search.toLowerCase()))
+  .slice(0, 3);
+
+// 3. Combine with API results
+// Ensure googleSuggestions is definitely an array before spreading
+const combinedSuggestions = [
+  ...new Set([
+    ...instantMatches, 
+    ...(Array.isArray(googleSuggestions) ? googleSuggestions : [])
+  ])
+].slice(0, 6);
+
+  // 3. Your Google Fetch Effect
+  const [isSearching, setIsSearching] = useState(false);
+
+// 2. Update the Fetch Effect
+useEffect(() => {
+  const controller = new AbortController();
+  const signal = controller.signal;
+
+  if (search.trim().length < 2) {
+    setGoogleSuggestions([]);
+    setIsSearching(false);
+    return;
+  }
+
+  // Set loading to true immediately when typing starts
+  setIsSearching(true);
+
+  const delayDebounceFn = setTimeout(async () => {
+    try {
+      // We now call OUR OWN internal API route
+      const response = await fetch(`/api/suggestions?q=${encodeURIComponent(search)}`, { signal });
+      
+      if (!response.ok) throw new Error("API Error");
+      
+      const data = await response.json();
+      setGoogleSuggestions(data || []);
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        console.error("Search API error:", error);
+      }
+    } finally {
+      // Stop the "Searching..." animation/text
+      setIsSearching(false);
+    }
+  }, 200); // 200ms debounce
+
+  return () => {
+    clearTimeout(delayDebounceFn);
+    controller.abort();
+  };
+}, [search]);
+
+
+const filteredSuggestions = [...new Set([...recentSearches, ...popularSearches])]
+  .filter((term) => term.toLowerCase().includes(search.toLowerCase()))
+  .slice(0, 6); // Limit to top 6 matches
   const isDesktopOrLaptop = useMediaQuery({ query: '(min-width: 700px)' });
   const isTabletOrMobile = useMediaQuery({ query: '(max-width: 699px)' });
 
+  const getRecentSearches = () => {
+    if (typeof window === "undefined") return [];
+    const history = localStorage.getItem("recent_searches");
+    return history ? JSON.parse(history) : [];
+  };
+
+  const saveSearch = (term) => {
+    let history = getRecentSearches();
+    history = [term, ...history.filter(t => t !== term)].slice(0, 5); 
+    localStorage.setItem("recent_searches", JSON.stringify(history));
+  };
+const removeRecentSearch = (e, term) => {
+  // Prevent the input from losing focus
+  e.preventDefault(); 
+  // Prevent the click from triggering a search
+  e.stopPropagation(); 
+
+  const history = getRecentSearches().filter((t) => t !== term);
+  localStorage.setItem("recent_searches", JSON.stringify(history));
+  setRecentSearches(history);
+};
   useEffect(() => {
+    setRecentSearches(getRecentSearches());
+    
     const textOptions = [
       'Start your <span class="font-bold ">smart</span> online shopping.',
       'Compare <span class="font-semibold">prices</span> easily.',
@@ -47,210 +141,302 @@ function HomePage() {
   }, []);
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!search.trim()) return;
+    
+    saveSearch(search.trim());
+    setRecentSearches(getRecentSearches());
     router.push(`/search?q=${encodeURIComponent(search)}`);
   };
-  const res = process.env.KAMELEO;
+
+  const handleSuggestionClick = (term) => {
+    setSearch(term);
+    saveSearch(term);
+    router.push(`/search?q=${encodeURIComponent(term)}`);
+  };
 
   return (
     <>
-
-    {isDesktopOrLaptop &&
-    <>
-      <div className="min-h-[calc(screen-120px)] ">
-        <div className="py-15 px-16"></div>
-        <div className="min-h-80 flex justify-center items-center w-full flex-col gap-10">
-          {/* Search Section */}
-          <div className="flex flex-row justify-center items-center w-full">
-            <div className="w-full flex max-w-[700px]  relative">
-              {/* Fading Placeholder */}
-              {!search && (
-                
-                <div
-                  className={`absolute left-12 top-1/2 transform -translate-y-1/2 
-                    text-white/50 pointer-events-none z-10 transition-opacity duration-500 ${fadeState === "fade-in" ? "opacity-100" : "opacity-0"
-                    }`}
-                  style={{ whiteSpace: "nowrap" }}
-                  dangerouslySetInnerHTML={{ __html: fadeText }}
-                  
-                />
-              
-              
-              )}
-
-              <div className="glass-search relative flex-[22]">
-                <form onSubmit={handleSubmit}>
-                  <FaMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 text-[16px] pointer-events-none" />
-                  
-                  <input
-                    className="w-full rounded-l-2xl text-white placeholder-white/50 text-[16px] font-normal"
-                    type="text" 
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                </form>
-              </div>
-              {/* Search Button */}
-              <div onClick={handleSubmit}>
-                <button
-                  type="button"
-                  className="flex-[1] h-[48px] search-button flex items-center justify-center rounded-r-2xl px-6"
-                >
-                  <FaMagnifyingGlass className=" text-white/70 text-lg" />
-                </button>
-                
-                
-              </div>
-            </div>
-          </div>
-
-          {/* Below content */}
-          <div
-            className="flex justify-center items-center flex-row  font-vagRounded text-white font-medium text-1xl "
-            style={{ width: "40%" }}
-          > 
-          
-          <div className="flex !items-center gap-1 ">
-
-          
-           <Popover.Root>
-              <Popover.Trigger asChild>
-                 <IoMdInformationCircleOutline className="cursor-pointer "size={18} color="white" />
-              </Popover.Trigger>
-              
-              <Popover.Portal>
-                <Popover.Content 
-                  className="  !cursor-text z-50 w-64 rounded-md !border-none glass-button max-w-[210px] p-4 text-white 
-                  shadow-md animate-in fade-in zoom-in duration-200 !outline-none"
-                  sideOffset={5}
-                >
-                  <div className=" gap-1 items-center flex flex-row font-bold border-b border-white mb-2 pb-1">
-              <FaExclamation size={10} />
-                   Notice
-                  </div>
-                  <p className="text-sm">
-                    <span className="text-orange-500">Shopee</span> products are currently not available.
-                  </p>
-                  <Popover.Arrow className="fill-white/50" />
-                </Popover.Content>
-              </Popover.Portal>
-            </Popover.Root>
-
-
-            <p className=" cursor-default ml-1 mr-3 ">Powered by </p>
-
-                <div className="flex gap-4">
-              
-            <Image className="cursor-pointer items-center" src={lazada} alt="Lazada" width={24} height={24} onClick={() =>
-              window.open(
-                "https://www.lazada.com.ph/"
-
-              )
-            } />
-            <Image className="cursor-pointer tems-center" src={shopee} alt="Shopee" width={16} height={16} onClick={() =>
-              window.open(
-                "https://shopee.ph/"
-
-              )
-            } /> </div>
-
-          </div></div>
-        </div>
-      </div>
-    
-      <Footer />
-     
-      </>
-      }
-      
-    {isTabletOrMobile &&
-  <>
-          <div className="!overflow-hidden h-[calc(100vh-200px)] flex flex-col">
-            {/* 3. Mobile Transitioning Spacer */}
-            <div className={`transition-all duration-200 ease-in-out ${isFocused ? "h-2" : "h-1/3"}`}></div>
-            
-            <div className="flex !justify-center items-center w-full flex-col gap-5">
-              <div className="flex flex-row !justify-center !items-center ">
-                <div className="flex w-[clamp(320px,85vw,800px)] relative mx-auto">
+      {isDesktopOrLaptop && (
+        <>
+          <div className="min-h-[calc(screen-120px)] ">
+            <div className="py-15 px-16"></div>
+            <div className="min-h-80 flex justify-center items-center w-full flex-col gap-10">
+              <div className="flex flex-row justify-center items-center w-full">
+                <div className="w-full flex max-w-[700px] relative">
                   {!search && (
                     <div
-                      className={`absolute left-10 top-1/2 transform -translate-y-1/2 text-[14px]
-                        text-white/50 pointer-events-none z-10 transition-opacity duration-500 ${
-                        fadeState === "fade-in" ? "opacity-100" : "opacity-0"
-                      }`}
+                      className={`absolute left-12 top-1/2 transform -translate-y-1/2 
+                        text-white/50 pointer-events-none z-10 transition-opacity duration-500 ${fadeState === "fade-in" ? "opacity-100" : "opacity-0"}`}
                       style={{ whiteSpace: "nowrap" }}
                       dangerouslySetInnerHTML={{ __html: fadeText }}
                     />
                   )}
 
-                  <div className="!h-[52px] glass-search relative !flex-grow">
+                  <div className="glass-search relative flex-[22]">
                     <form onSubmit={handleSubmit}>
-                      <FaMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 text-[14px] pointer-events-none" />
+                      <FaMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 text-[16px] pointer-events-none" />
                       <input
-                        className="!px-[40px] w-full rounded-l-2xl text-white placeholder-white/50 !text-[14px] font-normal"
-                        type="text"
+                        className="w-full rounded-l-2xl text-white placeholder-white/50 text-[16px] font-normal"
+                        type="text" 
                         value={search}
                         onFocus={() => setIsFocused(true)}
-                        onBlur={() => !search && setIsFocused(false)}
+                        onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                         onChange={(e) => setSearch(e.target.value)}
                       />
                     </form>
                   </div>
                   <div onClick={handleSubmit}>
-                    <button
-                      type="button"
-                      className="flex-[1] !h-[52px] search-button flex items-center justify-center rounded-r-2xl px-5"
-                    >
-                      <FaMagnifyingGlass className=" text-white/70 text-[12px]" />
+                    <button type="button" className="flex-[1] h-[48px] search-button flex items-center justify-center rounded-r-2xl px-6">
+                      <FaMagnifyingGlass className=" text-white/70 text-lg" />
                     </button>
                   </div>
+
+                  {/* --- DROPDOWN (Now shows Popular if Recent is empty) --- */}
+                         {/* --- SINGLE-COLUMN STACKED SUGGESTION DROPDOWN --- */}
+{isFocused && (
+  <div className="absolute top-[58px] left-0 w-full glass-button border-none rounded-[20px] p-4 z-50 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
+    <div className="flex flex-col gap-6">
+      
+     {search.length > 0 ? (
+  <div className="flex flex-col gap-1">
+    <p className="text-white/40 text-[9px] font-bold uppercase tracking-wider mb-2 px-2">Suggestions</p>
+    
+    {isSearching ? (
+      /* Show this while the API is actually working */
+      <p className="text-white/20 text-[10px] animate-pulse italic px-2">Searching...</p>
+    ) : combinedSuggestions.length > 0 ? (
+      /* Show results if found */
+      combinedSuggestions.map((term, i) => (
+        <div 
+          key={i}
+          onMouseDown={() => handleSuggestionClick(term)}
+          className="flex items-center gap-3 text-white/70 cursor-pointer hover:bg-white/5 p-3 rounded-lg transition-all"
+        >
+          <FaMagnifyingGlass size={12} className="shrink-0 opacity-40" />
+          <span className="text-[14px] truncate">{term}</span>
+        </div>
+      ))
+    ) : (
+      /* Show this only if searching is finished AND no results exist */
+      <p className="text-white/20 text-[10px] italic px-2">No results found</p>
+    )}
+  </div>
+) : (
+        /* --- DEFAULT VIEW: RECENT & POPULAR --- */
+        <>
+          {recentSearches.length > 0 && (
+            <div className="flex flex-col gap-1">
+              <p className="text-white/40 text-[9px] font-bold uppercase tracking-wider mb-1 px-2">Recent</p>
+              {recentSearches.map((term, i) => (
+                <div key={i} onMouseDown={() => handleSuggestionClick(term)} className="flex items-center justify-between group cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-all">
+                  <div className="flex items-center gap-2 text-white/70 overflow-hidden">
+                    <FaClock size={12} className="shrink-0 opacity-50" />
+                    <span className="text-[12px] truncate">{term}</span>
+                  </div>
+                  <button onMouseDown={(e) => removeRecentSearch(e, term)} className="p-1 hover:text-red-400 transition-all shrink-0">
+                    <IoClose size={14} className="text-white/40" />
+                  </button>
                 </div>
+              ))}
+            </div>
+          )}
+
+          <div className={`flex flex-col gap-1 ${recentSearches.length > 0 ? 'pt-4 border-t border-white/10' : ''}`}>
+            <p className="text-white/40 text-[9px] font-bold uppercase tracking-wider mb-1 px-2">Popular</p>
+            {popularSearches.slice(0, 5).map((term, i) => (
+              <div key={i} onMouseDown={() => handleSuggestionClick(term)} className="flex items-center gap-2 text-white/70 cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-all group">
+                <FaMagnifyingGlass size={10} className="shrink-0 opacity-50" />
+                <span className="text-[12px] truncate font-medium">{term}</span>
               </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  </div>
+)}
+          </div>
+        </div>
 
-              <div className={`flex justify-center items-center flex-row font-vagRounded text-white font-medium transition-opacity 
-                ${isFocused ? "opacity-0" : "opacity-100"}`} style={{ width: "40%" }}>
-                <div className="flex !items-center gap-1 !mb-0">
-                <Popover.Root>
-  <Popover.Trigger asChild>
-    <IoMdInformationCircleOutline className="items-center cursor-pointer mb-[1.5px]" size={12} color="white" />
-  </Popover.Trigger>
-  
-  <Popover.Portal>
-    {/* Added sideOffset to give the arrow some breathing room */}
-    <Popover.Content 
-      sideOffset={5} 
-      className="z-50  !rounded-[16px] !border-none glass-button max-w-[120px] p-3 text-white shadow-md !outline-none"
-    >
-      <div className="items-center flex flex-row font-bold border-b border-white mb-2 pb-1">
-        <FaExclamation size={10} />
-        <span className="text-[10px]">Notice</span>
-      </div>
-      <p className="text-[8px]">
-        <span className="text-orange-500">Shopee</span> roducts are currently not available.
-      </p>
-
-      {/* --- The Arrowhead --- */}
-      <Popover.Arrow className="fill-white/50" width={10} height={5} />
-    </Popover.Content>
-  </Popover.Portal>
-</Popover.Root>
-                  <p className=" cursor-default mr-2 text-[10px]">Powered by </p>
-                </div>
-                <div className="flex gap-2">
-                  <Image src={lazada} alt="Lazada" width={14} height={24} onClick={() => window.open("https://www.lazada.com.ph/")} />
-                  <Image src={shopee} alt="Shopee" width={10} height={16} onClick={() => window.open("https://shopee.ph/")} />
+              {/* Rest of UI stays the same */}
+              <div className="flex justify-center items-center flex-row font-vagRounded text-white font-medium text-1xl " style={{ width: "40%" }}> 
+                <div className="flex !items-center gap-1 ">
+                  <Popover.Root>
+                    <Popover.Trigger asChild>
+                      <IoMdInformationCircleOutline className="cursor-pointer "size={18} color="white" />
+                    </Popover.Trigger>
+                    <Popover.Portal>
+                      <Popover.Content className="!cursor-text z-50 w-64 rounded-md !border-none glass-button max-w-[210px] p-4 text-white shadow-md animate-in fade-in zoom-in duration-200 !outline-none" sideOffset={5}>
+                        <div className=" gap-1 items-center flex flex-row font-bold border-b border-white mb-2 pb-1">
+                          <FaExclamation size={10} /> Notice
+                        </div>
+                        <p className="text-sm"><span className="text-orange-500">Shopee</span> products are currently not available.</p>
+                        <Popover.Arrow className="fill-white/50" />
+                      </Popover.Content>
+                    </Popover.Portal>
+                  </Popover.Root>
+                  <p className=" cursor-default ml-1 mr-3 ">Powered by </p>
+                  <div className="flex gap-4">
+                    <Image className="cursor-pointer items-center" src={lazada} alt="Lazada" width={24} height={24} onClick={() => window.open("https://www.lazada.com.ph/")} />
+                    <Image className="cursor-pointer tems-center" src={shopee} alt="Shopee" width={16} height={16} onClick={() => window.open("https://shopee.ph/")} />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-          <div onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()} className="select-none">
-            <Footer />
+          <Footer />
+        </>
+      )}
+      
+    {isTabletOrMobile && (
+  <>
+    <div className="!overflow-hidden h-[calc(100vh-200px)] flex flex-col">
+      {/* 3. Mobile Transitioning Spacer */}
+      <div className={`transition-all duration-200 ease-in-out ${isFocused ? "h-2" : "h-1/3"}`}></div>
+
+      <div className="flex !justify-center items-center w-full flex-col gap-5">
+        <div className="flex flex-row !justify-center !items-center">
+          <div className="flex w-[clamp(320px,85vw,800px)] relative mx-auto">
+            {/* Placeholder Text */}
+            {!search && (
+              <div
+                className={`absolute left-10 top-1/2 transform -translate-y-1/2 text-[14px]
+                  text-white/50 pointer-events-none z-10 transition-opacity duration-500 ${
+                  fadeState === "fade-in" ? "opacity-100" : "opacity-0"
+                }`}
+                style={{ whiteSpace: "nowrap" }}
+                dangerouslySetInnerHTML={{ __html: fadeText }}
+              />
+            )}
+
+            {/* Search Input Box */}
+            <div className="!h-[52px] glass-search relative !flex-grow">
+              <form onSubmit={handleSubmit}>
+                <FaMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 text-[14px] pointer-events-none" />
+                <input
+                  className="!px-[40px] w-full rounded-l-2xl text-white placeholder-white/50 !text-[14px] font-normal"
+                  type="text"
+                  value={search}
+                  onFocus={() => setIsFocused(true)}
+                  // Delay blur so clicks on suggestions are registered
+                  onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </form>
+            </div>
+
+            {/* Submit Button */}
+            <div onClick={handleSubmit}>
+              <button
+                type="button"
+                className="flex-[1] !h-[52px] search-button flex items-center justify-center rounded-r-2xl px-5"
+              >
+                <FaMagnifyingGlass className="text-white/70 text-[12px]" />
+              </button>
+            </div>
+
+          {/* --- SINGLE-COLUMN STACKED SUGGESTION DROPDOWN --- */}
+{isFocused && (
+  <div className="absolute top-[58px] left-0 w-full glass-button border-none rounded-[20px] p-4 z-50 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
+    <div className="flex flex-col gap-6">
+      
+     {search.length > 0 ? (
+  <div className="flex flex-col gap-1">
+    <p className="text-white/40 text-[9px] font-bold uppercase tracking-wider mb-2 px-2">Suggestions</p>
+    
+    {isSearching ? (
+      /* Show this while the API is actually working */
+      <p className="text-white/20 text-[10px] animate-pulse italic px-2">Searching...</p>
+    ) : combinedSuggestions.length > 0 ? (
+      /* Show results if found */
+      combinedSuggestions.map((term, i) => (
+        <div 
+          key={i}
+          onMouseDown={() => handleSuggestionClick(term)}
+          className="flex items-center gap-3 text-white/70 cursor-pointer hover:bg-white/5 p-3 rounded-lg transition-all"
+        >
+          <FaMagnifyingGlass size={12} className="shrink-0 opacity-40" />
+          <span className="text-[14px] truncate">{term}</span>
+        </div>
+      ))
+    ) : (
+      /* Show this only if searching is finished AND no results exist */
+      <p className="text-white/20 text-[10px] italic px-2">No results found</p>
+    )}
+  </div>
+) : (
+        /* --- DEFAULT VIEW: RECENT & POPULAR --- */
+        <>
+          {recentSearches.length > 0 && (
+            <div className="flex flex-col gap-1">
+              <p className="text-white/40 text-[9px] font-bold uppercase tracking-wider mb-1 px-2">Recent</p>
+              {recentSearches.map((term, i) => (
+                <div key={i} onMouseDown={() => handleSuggestionClick(term)} className="flex items-center justify-between group cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-all">
+                  <div className="flex items-center gap-2 text-white/70 overflow-hidden">
+                    <FaClock size={12} className="shrink-0 opacity-50" />
+                    <span className="text-[12px] truncate">{term}</span>
+                  </div>
+                  <button onMouseDown={(e) => removeRecentSearch(e, term)} className="p-1 hover:text-red-400 transition-all shrink-0">
+                    <IoClose size={14} className="text-white/40" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className={`flex flex-col gap-1 ${recentSearches.length > 0 ? 'pt-4 border-t border-white/10' : ''}`}>
+            <p className="text-white/40 text-[9px] font-bold uppercase tracking-wider mb-1 px-2">Popular</p>
+            {popularSearches.slice(0, 5).map((term, i) => (
+              <div key={i} onMouseDown={() => handleSuggestionClick(term)} className="flex items-center gap-2 text-white/70 cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-all group">
+                <FaMagnifyingGlass size={10} className="shrink-0 opacity-50" />
+                <span className="text-[12px] truncate font-medium">{term}</span>
+              </div>
+            ))}
           </div>
         </>
-      
-      }
-    </>
+      )}
+    </div>
+  </div>
+)}
+          </div>
+        </div>
+
+        {/* Footer Content (Notice & Powered By) */}
+        <div className={`flex justify-center items-center flex-row font-vagRounded text-white font-medium transition-opacity duration-300 
+          ${isFocused ? "opacity-0 pointer-events-none" : "opacity-100"}`} style={{ width: "40%" }}>
+          <div className="flex !items-center gap-1 !mb-0">
+            <Popover.Root>
+              <Popover.Trigger asChild>
+                <IoMdInformationCircleOutline className="items-center cursor-pointer mb-[1.5px]" size={12} color="white" />
+              </Popover.Trigger>
+              <Popover.Portal>
+                <Popover.Content sideOffset={5} className="z-50 !rounded-[16px] !border-none glass-button max-w-[120px] p-3 text-white shadow-md !outline-none">
+                  <div className="items-center flex flex-row font-bold border-b border-white mb-2 pb-1">
+                    <FaExclamation size={10} />
+                    <span className="text-[10px]">Notice</span>
+                  </div>
+                  <p className="text-[8px]">
+                    <span className="text-orange-500">Shopee</span> products are currently not available.
+                  </p>
+                  <Popover.Arrow className="fill-white/50" width={10} height={5} />
+                </Popover.Content>
+              </Popover.Portal>
+            </Popover.Root>
+            <p className="cursor-default mr-2 text-[10px]">Powered by </p>
+          </div>
+          <div className="flex gap-2">
+            <Image src={lazada} alt="Lazada" width={14} height={24} onClick={() => window.open("https://www.lazada.com.ph/")} />
+            <Image src={shopee} alt="Shopee" width={10} height={16} onClick={() => window.open("https://shopee.ph/")} />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()} className="select-none">
+      <Footer />
+    </div>
+  </>
+)}</>
   );
 }
 

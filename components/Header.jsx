@@ -2,7 +2,7 @@
 
 import { useMediaQuery } from 'react-responsive';
 import { useEffect, useState, useRef } from "react";
-import { FaMagnifyingGlass } from "react-icons/fa6";
+import { FaMagnifyingGlass, FaExclamation, FaClock, FaFire } from "react-icons/fa6"; // Added FaFire
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { FaHistory } from "react-icons/fa";
@@ -14,15 +14,54 @@ import History from "./History";
 import UserLikes from "./UserLikes";
 import { useClerk } from "@clerk/nextjs";
 import { RxQuestionMarkCircled } from "react-icons/rx";
-
+import { IoClose } from "react-icons/io5"; // Added Close Icon
 function Header({ visible = false }) {
 
   const isDesktopOrLaptop = useMediaQuery({ query: '(min-width: 700px)' });
 
   const isTabletOrMobile = useMediaQuery({ query: '(max-width: 699px)' });
+  // Mocking "Real" Popular Lazada Searches (Trending in PH)
+  const popularSearches = [
+    "Aquaflask", "iPhone 15 Pro Max", "Bluetooth Speaker", "Mechanical Keyboard", "Sunscreen"
+  ];
+const getRecentSearches = () => {
+    if (typeof window === "undefined") return [];
+    const history = localStorage.getItem("recent_searches");
+    return history ? JSON.parse(history) : [];
+  };
+
+  const saveSearch = (term) => {
+    let history = getRecentSearches();
+    history = [term, ...history.filter(t => t !== term)].slice(0, 5); 
+    localStorage.setItem("recent_searches", JSON.stringify(history));
+  };
+const removeRecentSearch = (e, term) => {
+  // Prevent the input from losing focus
+  e.preventDefault(); 
+  // Prevent the click from triggering a search
+  e.stopPropagation(); 
+
+  const history = getRecentSearches().filter((t) => t !== term);
+  localStorage.setItem("recent_searches", JSON.stringify(history));
+  setRecentSearches(history);
+};
 
 
 
+  const handleSubmit = (e) => {
+    if (e) e.preventDefault();
+    if (!search.trim()) return;
+    
+    saveSearch(search.trim());
+    setRecentSearches(getRecentSearches());
+    router.push(`/search?q=${encodeURIComponent(search)}`);
+  };
+
+  const handleSuggestionClick = (term) => {
+    setSearch(term);
+    saveSearch(term);
+    router.push(`/search?q=${encodeURIComponent(term)}`);
+  };
   const { openUserProfile } = useClerk();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -32,7 +71,9 @@ function Header({ visible = false }) {
   const [isFocused, setIsFocused] = useState(false);
   const [showIcon, setShowIcon] = useState(false);
   const hoverTimer = useRef(null);
-
+  const [recentSearches, setRecentSearches] = useState([]);
+ const [fadeText, setFadeText] = useState("");
+  const [fadeState, setFadeState] = useState("fade-in");
 
    const handleTipsClick = () => {
     router.push("/Tips"); 
@@ -127,7 +168,59 @@ function Header({ visible = false }) {
                   <FaMagnifyingGlass className="text-white/70 text-lg" />
                 </button>
               </div>
-            </div>
+                {/* --- DROPDOWN (Now shows Popular if Recent is empty) --- */}
+                                {isFocused && (
+                                  <div className="absolute top-[52px] left-0 w-full glass-button border-none rounded-2xl p-5 z-50 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
+                                    
+                                    {/* Popular Section (Always shows) */}
+                                    <div className="mb-4">
+                                      <div className="flex items-center gap-2 mb-3 text-orange-400 text-xs font-bold uppercase tracking-wider">
+                                        <FaFire size={12} />
+                                        Popular Searches
+                                      </div>
+                                      <div className="flex flex-wrap gap-2">
+                                        {popularSearches.map((term, i) => (
+                                          <button 
+                                            key={i}
+                                            onClick={() => handleSuggestionClick(term)}
+                                            className="bg-white/5 hover:bg-white/20 border border-white/10 text-white/80 text-xs px-3 py-1.5 rounded-full transition-all"
+                                          >
+                                            {term}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+              
+                                    {/* Recent Section (Only shows if history exists) */}
+                                 {recentSearches.length > 0 && (
+                                      <div className="mt-4 pt-4 border-t border-white/10">
+                                        <div className="flex items-center gap-2 mb-2 text-white/40 text-xs font-bold uppercase">
+                                          <FaClock size={11} /> Recent History
+                                        </div>
+                                        <ul className="flex flex-col gap-1">
+                {recentSearches.map((term, i) => (
+                  <li 
+                    key={i}
+                    onClick={() => handleSuggestionClick(term)}
+                    className="text-white/70 hover:text-white hover:bg-white/5 p-2 px-3 rounded-lg cursor-pointer text-sm transition-all flex justify-between items-center group"
+                  >
+                    <span>{term}</span>
+                    <button 
+                      // Use onMouseDown to prevent blur
+                      onMouseDown={(e) => removeRecentSearch(e, term)}
+                      className="opacity-0 group-hover:opacity-100 hover:text-red-400 p-1 transition-all"
+                    >
+                      <IoClose size={18} />
+                    </button>
+                  </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+           
           )}
         </div>
 
