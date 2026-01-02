@@ -43,7 +43,7 @@ const combinedSuggestions = [
     ...instantMatches, 
     ...(Array.isArray(googleSuggestions) ? googleSuggestions : [])
   ])
-].slice(0, 6);
+].slice(0, 4);
 
   // 3. Your Google Fetch Effect
   const [isSearching, setIsSearching] = useState(false);
@@ -195,7 +195,9 @@ const removeRecentSearch = (e, term) => {
                   {/* --- DROPDOWN (Now shows Popular if Recent is empty) --- */}
                          {/* --- SINGLE-COLUMN STACKED SUGGESTION DROPDOWN --- */}
 {isFocused && (
-  <div className="absolute top-[58px] left-0 w-full glass-button border-none rounded-[20px] p-4 z-50 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
+  <div className="absolute top-[58px] left-0 w-full hover:!bg-transparent glass-button 
+  
+  border-none rounded-[20px] p-4 z-50 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
     <div className="flex flex-col gap-6">
       
      {search.length > 0 ? (
