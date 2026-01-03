@@ -15,16 +15,88 @@ import UserLikes from "./UserLikes";
 import { useClerk } from "@clerk/nextjs";
 import { RxQuestionMarkCircled } from "react-icons/rx";
 import { IoClose } from "react-icons/io5"; // Added Close Icon
-function Header({ visible = false }) {
 
+
+
+function Header({ visible = false }) {
+ const [recentSearches, setRecentSearches] = useState([]);
   const isDesktopOrLaptop = useMediaQuery({ query: '(min-width: 700px)' });
 
   const isTabletOrMobile = useMediaQuery({ query: '(max-width: 699px)' });
   // Mocking "Real" Popular Lazada Searches (Trending in PH)
-  const popularSearches = [
-    "Aquaflask", "iPhone 15 Pro Max", "Bluetooth Speaker", "Mechanical Keyboard", "Sunscreen"
-  ];
-const getRecentSearches = () => {
+ 
+const [search, setSearch] = useState("");
+
+  
+ const [googleSuggestions, setGoogleSuggestions] = useState([]);
+  // ... other states
+
+  // 1. Define static data first
+  const popularSearches = ["Aquaflask", "iPhone 15 Pro Max", "Bluetooth Speaker", "Mechanical Keyboard", "Sunscreen"];
+
+// 2. Filter local matches (Recent + Popular)
+const instantMatches = [...new Set([...recentSearches, ...popularSearches])]
+  .filter(term => term.toLowerCase().includes(search.toLowerCase()))
+  .slice(0, 3);
+
+// 3. Combine with API results
+// Ensure googleSuggestions is definitely an array before spreading
+const combinedSuggestions = [
+  ...new Set([
+    ...instantMatches, 
+    ...(Array.isArray(googleSuggestions) ? googleSuggestions : [])
+  ])
+].slice(0, 4);
+
+  // 3. Your Google Fetch Effect
+  const [isSearching, setIsSearching] = useState(false);
+
+// 2. Update the Fetch Effect
+useEffect(() => {
+  const controller = new AbortController();
+  const signal = controller.signal;
+
+  if (search.trim().length < 2) {
+    setGoogleSuggestions([]);
+    setIsSearching(false);
+    return;
+  }
+
+  // Set loading to true immediately when typing starts
+  setIsSearching(true);
+
+  const delayDebounceFn = setTimeout(async () => {
+    try {
+      // We now call OUR OWN internal API route
+      const response = await fetch(`/api/suggestions?q=${encodeURIComponent(search)}`, { signal });
+      
+      if (!response.ok) throw new Error("API Error");
+      
+      const data = await response.json();
+      setGoogleSuggestions(data || []);
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        console.error("Search API error:", error);
+      }
+    } finally {
+      // Stop the "Searching..." animation/text
+      setIsSearching(false);
+    }
+  }, 200); // 200ms debounce
+
+  return () => {
+    clearTimeout(delayDebounceFn);
+    controller.abort();
+  };
+}, [search]);
+
+
+const filteredSuggestions = [...new Set([...recentSearches, ...popularSearches])]
+  .filter((term) => term.toLowerCase().includes(search.toLowerCase()))
+  .slice(0, 6); // Limit to top 6 matches
+
+
+  const getRecentSearches = () => {
     if (typeof window === "undefined") return [];
     const history = localStorage.getItem("recent_searches");
     return history ? JSON.parse(history) : [];
@@ -48,20 +120,8 @@ const removeRecentSearch = (e, term) => {
 
 
 
-  const handleSubmit = (e) => {
-    if (e) e.preventDefault();
-    if (!search.trim()) return;
-    
-    saveSearch(search.trim());
-    setRecentSearches(getRecentSearches());
-    router.push(`/search?q=${encodeURIComponent(search)}`);
-  };
-
-  const handleSuggestionClick = (term) => {
-    setSearch(term);
-    saveSearch(term);
-    router.push(`/search?q=${encodeURIComponent(term)}`);
-  };
+ 
+   
   const { openUserProfile } = useClerk();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -71,7 +131,7 @@ const removeRecentSearch = (e, term) => {
   const [isFocused, setIsFocused] = useState(false);
   const [showIcon, setShowIcon] = useState(false);
   const hoverTimer = useRef(null);
-  const [recentSearches, setRecentSearches] = useState([]);
+ 
  const [fadeText, setFadeText] = useState("");
   const [fadeState, setFadeState] = useState("fade-in");
 
@@ -83,10 +143,19 @@ const removeRecentSearch = (e, term) => {
     setQuery(q);
   }, [searchParams]);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
+const handleSubmit = (e) => {
+    if (e) e.preventDefault();
     if (!query.trim()) return;
+    
+    saveSearch(query.trim());
+    setRecentSearches(getRecentSearches());
     router.push(`/search?q=${encodeURIComponent(query)}`);
+  };
+
+  const handleSuggestionClick = (term) => {
+    setSearch(term);
+    saveSearch(term);
+    router.push(`/search?q=${encodeURIComponent(term)}`);
   };
   if (visible) return null; // 👈 Hide header entirely when not visible
 
@@ -136,7 +205,7 @@ const removeRecentSearch = (e, term) => {
             <div className="flex w-full">
               {/* Search Input */}
               <div className="glass-search relative flex-[22]">
-                <form onSubmit={handleSearch}>
+                <form onSubmit={handleSubmit}>
 
                   <input
                     name="q"
@@ -160,7 +229,7 @@ const removeRecentSearch = (e, term) => {
               </div>
 
               {/* Search Button */}
-              <div onClick={handleSearch}>
+              <div onClick={handleSubmit}>
                 <button
                   type="button"
                   className="flex-[1] h-[48px] search-button flex items-center justify-center rounded-r-2xl px-6"
@@ -169,60 +238,69 @@ const removeRecentSearch = (e, term) => {
                 </button>
               </div>
                 {/* --- DROPDOWN (Now shows Popular if Recent is empty) --- */}
-                                {isFocused && (
-                                  <div className="absolute top-[52px] left-0 w-full glass-button border-none rounded-2xl p-5 z-50 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
-                                    
-                                    {/* Popular Section (Always shows) */}
-                                    <div className="mb-4">
-                                      <div className="flex items-center gap-2 mb-3 text-orange-400 text-xs font-bold uppercase tracking-wider">
-                                        <FaFire size={12} />
-                                        Popular Searches
-                                      </div>
-                                      <div className="flex flex-wrap gap-2">
-                                        {popularSearches.map((term, i) => (
-                                          <button 
-                                            key={i}
-                                            onClick={() => handleSuggestionClick(term)}
-                                            className="bg-white/5 hover:bg-white/20 border border-white/10 text-white/80 text-xs px-3 py-1.5 rounded-full transition-all"
-                                          >
-                                            {term}
-                                          </button>
-                                        ))}
-                                      </div>
-                                    </div>
-              
-                                    {/* Recent Section (Only shows if history exists) */}
-                                 {recentSearches.length > 0 && (
-                                      <div className="mt-4 pt-4 border-t border-white/10">
-                                        <div className="flex items-center gap-2 mb-2 text-white/40 text-xs font-bold uppercase">
-                                          <FaClock size={11} /> Recent History
-                                        </div>
-                                        <ul className="flex flex-col gap-1">
-                {recentSearches.map((term, i) => (
-                  <li 
-                    key={i}
-                    onClick={() => handleSuggestionClick(term)}
-                    className="text-white/70 hover:text-white hover:bg-white/5 p-2 px-3 rounded-lg cursor-pointer text-sm transition-all flex justify-between items-center group"
-                  >
-                    <span>{term}</span>
-                    <button 
-                      // Use onMouseDown to prevent blur
-                      onMouseDown={(e) => removeRecentSearch(e, term)}
-                      className="opacity-0 group-hover:opacity-100 hover:text-red-400 p-1 transition-all"
-                    >
-                      <IoClose size={18} />
-                    </button>
-                  </li>
-                                          ))}
-                                        </ul>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-           
-          )}
+                              <div className="absolute top-[58px] left-0 w-full glass-button border-none rounded-[20px] p-4 z-50 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
+    <div className="flex flex-col gap-6">
+      
+     {search.length > 0 ? (
+  <div className="flex flex-col gap-1">
+    <p className="text-white/40 text-[9px] font-bold uppercase tracking-wider mb-2 px-2">Suggestions</p>
+    
+    {isSearching ? (
+      /* Show this while the API is actually working */
+      <p className="text-white/20 text-[10px] animate-pulse italic px-2">Searching...</p>
+    ) : combinedSuggestions.length > 0 ? (
+      /* Show results if found */
+      combinedSuggestions.map((term, i) => (
+        <div 
+          key={i}
+          onMouseDown={() => handleSuggestionClick(term)}
+          className="flex items-center gap-3 text-white/70 cursor-pointer hover:bg-white/5 p-3 rounded-lg transition-all"
+        >
+          <FaMagnifyingGlass size={12} className="shrink-0 opacity-40" />
+          <span className="text-[14px] truncate">{term}</span>
         </div>
+      ))
+    ) : (
+      /* Show this only if searching is finished AND no results exist */
+      <p className="text-white/20 text-[10px] italic px-2">No results found</p>
+    )}
+  </div>
+) : (
+        /* --- DEFAULT VIEW: RECENT & POPULAR --- */
+        <>
+          {recentSearches.length > 0 && (
+            <div className="flex flex-col gap-1">
+              <p className="text-white/40 text-[9px] font-bold uppercase tracking-wider mb-1 px-2">Recent</p>
+              {recentSearches.map((term, i) => (
+                <div key={i} onMouseDown={() => handleSuggestionClick(term)} className="flex items-center justify-between group cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-all">
+                  <div className="flex items-center gap-2 text-white/70 overflow-hidden">
+                    <FaClock size={12} className="shrink-0 opacity-50" />
+                    <span className="text-[12px] truncate">{term}</span>
+                  </div>
+                  <button onMouseDown={(e) => removeRecentSearch(e, term)} className="p-1 hover:text-red-400 transition-all shrink-0">
+                    <IoClose size={14} className="text-white/40" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className={`flex flex-col gap-1 ${recentSearches.length > 0 ? 'pt-4 border-t border-white/10' : ''}`}>
+            <p className="text-white/40 text-[9px] font-bold uppercase tracking-wider mb-1 px-2">Popular</p>
+            {popularSearches.slice(0, 5).map((term, i) => (
+              <div key={i} onMouseDown={() => handleSuggestionClick(term)} className="flex items-center gap-2 text-white/70 cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-all group">
+                <FaMagnifyingGlass size={10} className="shrink-0 opacity-50" />
+                <span className="text-[12px] truncate font-medium">{term}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  </div> </div>
+ )}
+          </div>
+     
 
         {/* RIGHT SIDE */}
         <div className="flex justify-center items-center gap-1">
