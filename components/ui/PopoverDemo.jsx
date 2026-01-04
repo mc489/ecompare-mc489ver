@@ -83,7 +83,7 @@ const isDesktopOrLaptop = useMediaQuery({ query: '(min-width: 700px)' });
           <button
             onClick={AI}
             className={` text-center text-white mr-3 text-[14px]   !rounded-[12px] 
-              font-bold w-[160px] h-[40px] compare-button flex  flex-row justify-center items-center font-vagRounded cursor-pointer`}
+              font-bold w-[164px] h-[48px] compare-button flex  flex-row justify-center items-center font-vagRounded cursor-pointer`}
           >
             <HiSparkles className="text-[12px] text-white" />
             AI Recomendation

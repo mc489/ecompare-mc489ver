@@ -134,7 +134,7 @@ const isDesktopOrLaptop = useMediaQuery({ query: '(min-width: 700px)' });
     "Price: High to Low",
   ];
   const [selectedOption, setSelectedOption] = useState(options[0]);
-const [query, setQuery] = useState("");
+
   const handleSelect = (option) => setSelectedOption(option.value || option);
   
 
@@ -142,11 +142,11 @@ const [query, setQuery] = useState("");
    
  const handleSearch = (e) => {
     if (e) e.preventDefault();
-    if (!query.trim()) return;
+    if (!search.trim()) return;
     
-    saveSearch(query.trim());
+    saveSearch(search.trim());
     setRecentSearches(getRecentSearches());
-    router.push(`/search?q=${encodeURIComponent(query)}`);
+    router.push(`/search?q=${encodeURIComponent(search)}`);
   };
 
 const handleSuggestionClick = (term) => {
@@ -240,7 +240,7 @@ useEffect(() => {
                           {/* Submit Button */}
                           <div onClick={handleSearch}>
                             <button
-                              type="button"
+                              type="submit"
                               className="flex-[1] !h-[52px] search-button flex items-center justify-center rounded-r-2xl px-5"
                             >
                               <FaMagnifyingGlass className="text-white/70 text-[12px]" />

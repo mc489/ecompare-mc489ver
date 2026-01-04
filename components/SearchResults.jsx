@@ -1402,11 +1402,11 @@ if (selectedVar) {
                                 className="w-22 h-22 object-contain rounded-lg"
                               />
                               <p className="font-semibold line-clamp-2
-                               text-ellipsis !text-[6px] overflow-hidden text-center mt-3">
+                               text-ellipsis !text-[10px] overflow-hidden text-center mt-3">
                                 {result.title}
                               </p>
                               {result.brand && (
-                                <p className="text-[4px] text-white/60 mt-1">
+                                <p className="text-[10px] text-white/60 mt-1">
                                   {result.brand}
                                 </p>
                               )}
@@ -1436,7 +1436,7 @@ if (selectedVar) {
 
                         <div className="glass-button1 h-16  !w-[100px] rounded-0 flex items-center justify-center text-center">
                           <div className="flex flex-col">
-                            <span className="font-semibold text-[8px] opacity-60">
+                            <span className="font-semibold text-[10px] opacity-60">
                               Store
                             </span>
                               <span className="text-[10px]">{p?.source || "-"}</span>
@@ -1514,7 +1514,7 @@ if (selectedVar) {
                     setShowComparisonTable(false);
                     setShowCompare(true);
                   }}
-                  className="absolute top-[180px] right-[20px] text-white/80 text-[10px] 
+                  className="absolute top-[180px] right-[20px] text-white/80 text-[8px] 
                      font-medium hover:text-gray-300 cursor-pointer select-none z-50"
                 >
                   + Add 1 more item
