@@ -26,7 +26,7 @@ function Header({ visible = false }) {
   // Mocking "Real" Popular Lazada Searches (Trending in PH)
  
 const [search, setSearch] = useState("");
-
+  const [query, setQuery] = useState("");
   
  const [googleSuggestions, setGoogleSuggestions] = useState([]);
   // ... other states
@@ -36,7 +36,7 @@ const [search, setSearch] = useState("");
 
 // 2. Filter local matches (Recent + Popular)
 const instantMatches = [...new Set([...recentSearches, ...popularSearches])]
-  .filter(term => term.toLowerCase().includes(search.toLowerCase()))
+  .filter(term => term.toLowerCase().includes(query.toLowerCase()))
   .slice(0, 3);
 
 // 3. Combine with API results
@@ -52,44 +52,38 @@ const combinedSuggestions = [
   const [isSearching, setIsSearching] = useState(false);
 
 // 2. Update the Fetch Effect
+// Change the dependency and the check
 useEffect(() => {
   const controller = new AbortController();
   const signal = controller.signal;
 
-  if (search.trim().length < 2) {
+  // Use 'query' instead of 'search'
+  if (query.trim().length < 2) {
     setGoogleSuggestions([]);
     setIsSearching(false);
     return;
   }
 
-  // Set loading to true immediately when typing starts
   setIsSearching(true);
 
   const delayDebounceFn = setTimeout(async () => {
     try {
-      // We now call OUR OWN internal API route
-      const response = await fetch(`/api/suggestions?q=${encodeURIComponent(search)}`, { signal });
-      
+      const response = await fetch(`/api/suggestions?q=${encodeURIComponent(query)}`, { signal });
       if (!response.ok) throw new Error("API Error");
-      
       const data = await response.json();
       setGoogleSuggestions(data || []);
     } catch (error) {
-      if (error.name !== 'AbortError') {
-        console.error("Search API error:", error);
-      }
+      if (error.name !== 'AbortError') console.error("Search API error:", error);
     } finally {
-      // Stop the "Searching..." animation/text
       setIsSearching(false);
     }
-  }, 200); // 200ms debounce
+  }, 200);
 
   return () => {
     clearTimeout(delayDebounceFn);
     controller.abort();
   };
-}, [search]);
-
+}, [query]); // Watch query
 
 const filteredSuggestions = [...new Set([...recentSearches, ...popularSearches])]
   .filter((term) => term.toLowerCase().includes(search.toLowerCase()))
@@ -127,7 +121,7 @@ const removeRecentSearch = (e, term) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const isSearchPage = pathname === "/search";
-  const [query, setQuery] = useState("");
+ 
   const [isFocused, setIsFocused] = useState(false);
   const [showIcon, setShowIcon] = useState(false);
   const hoverTimer = useRef(null);
@@ -152,11 +146,11 @@ const handleSubmit = (e) => {
     router.push(`/search?q=${encodeURIComponent(query)}`);
   };
 
-  const handleSuggestionClick = (term) => {
-    setSearch(term);
-    saveSearch(term);
-    router.push(`/search?q=${encodeURIComponent(term)}`);
-  };
+ const handleSuggestionClick = (term) => {
+  setQuery(term); // Change this from setSearch to setQuery
+  saveSearch(term);
+  router.push(`/search?q=${encodeURIComponent(term)}`);
+};
   if (visible) return null; // 👈 Hide header entirely when not visible
 
   return (
@@ -175,11 +169,11 @@ const handleSubmit = (e) => {
               clearTimeout(hoverTimer.current);
               setShowIcon(false);
             }}
-            className="relative inline-block"
-          >
+className="relative flex items-center h-full"
+>          
             {/* TEXT */}
             <span
-              className={`absolute left-0 top-0 transition-opacity duration-300 ${showIcon ? "opacity-0" : "opacity-100"
+              className={`absolute left-0  transition-opacity duration-300 whitespace-nowrap ${showIcon ? "opacity-0" : "opacity-100"
                 }`}
             >
               E-COMPARE
@@ -245,7 +239,7 @@ const handleSubmit = (e) => {
   border-none rounded-[20px] p-4 z-50 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
     <div className="flex flex-col gap-6">
       
-     {search.length > 0 ? (
+     {query.length > 0 ? (
   <div className="flex flex-col gap-1">
     <p className="text-white/40 text-[9px] font-bold uppercase tracking-wider mb-2 px-2">Suggestions</p>
     
@@ -321,7 +315,7 @@ const handleSubmit = (e) => {
               </button>
             </Link>
             <Link href="/sign-up">
-              <button className="font-normal text-lg text-white font-vagRounded cursor-pointer rounded-full px-5 py-3 hover:text-gray-300 ease duration-500">
+              <button className=" whitespace-nowrap  font-normal text-lg text-white font-vagRounded cursor-pointer rounded-full px-5 py-3 hover:text-gray-300 ease duration-500">
                 Sign Up
               </button>
             </Link>

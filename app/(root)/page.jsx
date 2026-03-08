@@ -1,5 +1,5 @@
 "use client";
-import Footer from "@/components/Footer";
+
 import { useUser } from "@clerk/nextjs";
 import { FaMagnifyingGlass, FaExclamation, FaClock, FaFire } from "react-icons/fa6"; // Added FaFire
 import lazada from "@/public/lazada.svg";
@@ -11,11 +11,16 @@ import { IoMdInformationCircleOutline } from "react-icons/io";
 import { useMediaQuery } from 'react-responsive';
 import * as Popover from '@radix-ui/react-popover';
 import { IoClose } from "react-icons/io5"; // Added Close Icon
+import Footer from "@/components/Footer";
 function HomePage() {
+
+    const isDesktopOrLaptop = useMediaQuery({ query: '(min-width: 700px)' });
+  const isTabletOrMobile = useMediaQuery({ query: '(max-width: 699px)' });
   const router = useRouter();
   const { user } = useUser();
  
   const [fadeText, setFadeText] = useState("");
+  
   const [fadeState, setFadeState] = useState("fade-in");
   const [isFocused, setIsFocused] = useState(false);
 
@@ -91,8 +96,7 @@ useEffect(() => {
 const filteredSuggestions = [...new Set([...recentSearches, ...popularSearches])]
   .filter((term) => term.toLowerCase().includes(search.toLowerCase()))
   .slice(0, 6); // Limit to top 6 matches
-  const isDesktopOrLaptop = useMediaQuery({ query: '(min-width: 700px)' });
-  const isTabletOrMobile = useMediaQuery({ query: '(max-width: 699px)' });
+
 
   const getRecentSearches = () => {
     if (typeof window === "undefined") return [];

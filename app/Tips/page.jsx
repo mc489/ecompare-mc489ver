@@ -51,7 +51,7 @@ const isDesktopOrLaptop = useMediaQuery({ query: '(min-width: 700px)' });
 <div className="flex flex-col items-center">
   <FaBalanceScaleLeft  className=" mb-5 text-white text-[64px]"/>
 <span className="text-[20px] font-semibold">Step 2: Compare</span> 
-<span className="text-[14px] w-[200px] text-justify   ">View prices and ratings side-by-side. No more switching tabs—just the best deals in one view.</span>
+<span className="text-[14px] w-[200px] text-justify   ">View prices and ratings side-by-side. No more switching tabs just the best deals in one view.</span>
 </div>
 <div className="flex flex-col items-center">
   <TbShoppingCartHeart className=" mb-5 text-white text-[64px]"/>
@@ -103,7 +103,7 @@ px-10 py-8 flex flex-col gap-10  text-white whitespace  ">
 <div className="flex flex-col items-center">
   <FaBalanceScaleLeft  className=" mb-5 text-white text-[50px]"/>
 <span className="text-[14px] font-semibold">Step 2: Compare</span> 
-<span className="text-[8px] w-[150px] text-justify ">View prices and ratings side-by-side. No more switching tabs—just the best deals in one view.</span>
+<span className="text-[8px] w-[150px] text-justify ">View prices and ratings side-by-side. No more switching tabs just the best deals in one view.</span>
 </div>
 <div className="flex flex-col items-center">
   <TbShoppingCartHeart className=" mb-5 text-white text-[50px]"/>
