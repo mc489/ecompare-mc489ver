@@ -6,7 +6,7 @@ import { dark } from "@clerk/themes";
 import ShaderBackground from "@/components/BackGround";
 import { Toaster } from "sonner";
 import "../app/globals.css";
-
+import Script from 'next/script';
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -79,6 +79,14 @@ export default function RootLayout({ children }) {
         appearance={customAppearance}
       >
         <html lang="en" className={`${balooC.variable} ${vagRounded.variable}`}>
+          <head>
+            <Script
+              async
+              src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7611260688391260"
+              crossOrigin="anonymous"
+              strategy="afterInteractive"
+            />
+          </head>
           <body className="font-sans">{children}</body>
         </html>
         <Toaster />

@@ -12,6 +12,7 @@ import { useMediaQuery } from 'react-responsive';
 import * as Popover from '@radix-ui/react-popover';
 import { IoClose } from "react-icons/io5"; // Added Close Icon
 import Footer from "@/components/Footer";
+
 function HomePage() {
 
     const isDesktopOrLaptop = useMediaQuery({ query: '(min-width: 700px)' });
@@ -161,8 +162,10 @@ const removeRecentSearch = (e, term) => {
 
   return (
     <>
+
       {isDesktopOrLaptop && (
         <>
+        
           <div className="min-h-[calc(screen-120px)] ">
             <div className="py-15 px-16"></div>
             <div className="min-h-80 flex justify-center items-center w-full flex-col gap-10">
