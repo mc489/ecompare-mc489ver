@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useMediaQuery } from 'react-responsive';
 function Footer() {
-  const [displayText, setDisplayText] = useState("by Jeacodes");
+  const [displayText, setDisplayText] = useState("by ISPECMN");
   const [fadeClass, setFadeClass] = useState("opacity-100");
 
   const names = [
